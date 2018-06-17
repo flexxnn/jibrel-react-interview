@@ -6,13 +6,15 @@ import createSagaMiddleware from 'redux-saga';
 
 import { routerReducer, routerMiddleware } from 'react-router-redux';
 
+import rootSaga from './../sagas';
+
 import * as applicationState from './applicationState';
 
 // eslint-disable-next-line no-underscore-dangle
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 export const history = createHistory();
-export const sagaMiddleware = createSagaMiddleware();
+export const sagaMiddleware = createSagaMiddleware(rootSaga);
 const routerHistoryMiddleware = routerMiddleware(history);
 const store = createStore(
     combineReducers({
@@ -25,5 +27,6 @@ const store = createStore(
         // persistState(['appearance'])
     )
 );
+sagaMiddleware.run(rootSaga);
 
 export default store;

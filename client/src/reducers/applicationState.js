@@ -7,7 +7,8 @@ const {
 
 // eslint-disable-next-line import/prefer-default-export
 export function applicationState(state = {
-    applicationEnabled: false
+    applicationEnabled: false,
+    requestInterval: 1000
 }, action) {
     switch (action.type)
     {
