@@ -12,7 +12,7 @@ export function* toggleApplicationState() {
     else
         yield put({ type: APPLICATION_EN })
 }
-  
+
 export function* applicationStateSaga() {
     yield takeEvery(APPLICATION_TOGGLE_STATE, toggleApplicationState);
 }
