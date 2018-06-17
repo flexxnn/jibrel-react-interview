@@ -1,6 +1,6 @@
-import * as appearance from './appearance';
+import * as applicationState from './applicationState';
 
 // eslint-disable-next-line import/prefer-default-export
 export default {
-    ...appearance
+    ...applicationState
 };
