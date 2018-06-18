@@ -9,5 +9,17 @@ export const APPLICATION_TOGGLE_STATE = 'APPLICATION_TOGGLE_STATE';
 export function toggleState() {
     return {
         type: APPLICATION_TOGGLE_STATE
-    }
+    };
+}
+
+export function appEnable() {
+    return {
+        type: APPLICATION_EN
+    };
+}
+
+export function appDisable() {
+    return {
+        type: APPLICATION_DIS
+    };
 }
