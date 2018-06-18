@@ -9,6 +9,7 @@ import { routerReducer, routerMiddleware } from 'react-router-redux';
 import rootSaga from './../sagas';
 
 import * as applicationState from './applicationState';
+import * as requests from './requests';
 
 // eslint-disable-next-line no-underscore-dangle
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -19,6 +20,7 @@ const routerHistoryMiddleware = routerMiddleware(history);
 const store = createStore(
     combineReducers({
         ...applicationState,
+        ...requests,
         router: routerReducer
     }),
     composeEnhancers(

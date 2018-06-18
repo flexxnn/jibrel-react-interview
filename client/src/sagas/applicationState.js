@@ -1,13 +1,13 @@
 import { put, takeEvery, select } from 'redux-saga/effects'
 
-import {
+import actions from '../actions';
+const {
+    APPLICATION_TOGGLE_STATE,
     appEnable,
     appDisable
-} from '../actions/applicationState';
+} = actions;
 
-import { APPLICATION_TOGGLE_STATE } from '../actions/applicationState';
-
-export function* toggleApplicationState() {
+function* toggleApplicationState() {
     const state = yield select(state => state.applicationState);
     if (state.applicationEnabled)
         yield put(appDisable());
