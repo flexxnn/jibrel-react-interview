@@ -1,18 +1,19 @@
 import React from 'react';
 
 import Switch from './Switch';
+import RequestList from './RequestList';
+
+import './MainPage.scss';
 
 const MainPage = () => (
-    <div className="main-page">
+    <React.Fragment>
         <div className="header">
             <Switch />
         </div>
-        <div className="container">
-            <div className="list-messages">
-
-            </div>
+        <div className="content">
+            <RequestList />
         </div>
-    </div>
+    </React.Fragment>
 );
 
 export default MainPage;

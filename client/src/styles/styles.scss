@@ -1,0 +1,97 @@
+@import './colors.scss';
+
+* {
+    margin: 0;
+    padding: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    outline: none;
+}
+
+#root,html,body {
+    height:100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: $white;
+    font-family: 'Open Sans', Arial, sans-serif;
+    font-size: 13px;
+    color: $text;
+    line-height: 1;
+}
+
+.clear:after {
+    clear: both;
+    content: "";
+    display: block;
+    height: 0;
+}
+
+a {
+    color: $main;
+    text-decoration: none;
+    &:hover {
+        color: $title;
+    }
+}
+
+li {
+    list-style: none;
+}
+
+h1, h2, h3, h4 {
+    color: $title;
+    font-weight: normal;
+}
+
+h1 {
+    font-size: 24px;
+}
+
+.pull-left {
+    float: left;
+}
+
+.pull-right {
+    float: right;
+}
+
+.app-container, .wrapper {
+    height: 100%;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    height: 60px;
+    border-bottom: 1px solid $line;
+}
+
+.content {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    flex-wrap: wrap;
+    padding: 10px 20px;
+}
+
+.list-messages {
+    border: 1px solid #e0e0e0;
+/*    .row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0 25px;
+        background-color: #fff;
+        border-bottom: 1px solid #e0e0e0;
+    } */
+}
+
