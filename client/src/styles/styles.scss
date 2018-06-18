@@ -79,12 +79,29 @@ h1 {
     display: flex;
     flex: 1 0 auto;
     flex-direction: column;
-    flex-wrap: wrap;
-    padding: 10px 20px;
+    flex-wrap: wrap; 
 }
 
-.list-messages {
-    border: 1px solid #e0e0e0;
+.request-list {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    flex-wrap: wrap;
+
+    .row {
+        padding: 10px 20px;
+        & > .request-id {
+            margin-bottom: 5px;
+        }
+        & > .request-status {
+            position: absolute;
+            right: 20px;
+            top: 18px;
+        }
+        &.odd {
+            background-color: #F0F0F0;
+        }
+    }
 /*    .row {
         display: flex;
         flex-direction: row;
