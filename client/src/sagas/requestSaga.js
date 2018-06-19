@@ -39,7 +39,21 @@ function* makeRequestsTask() {
         }
     } finally {
         if (yield cancelled()) {
-            log('task canceled');
+            log('makeRequestsTask canceled');
+        }
+    }
+}
+
+function* checkRequestStatusTask() {
+    try {
+        // const rest = yield getContext('restClient');
+        while (true) {
+            log('xxx');
+            yield call(delay, 100);
+        }                
+    } finally {
+        if (yield cancelled()) {
+            log('checkRequestStatusTask canceled');
         }
     }
 }
@@ -47,20 +61,21 @@ function* makeRequestsTask() {
 function* onApplicationEn() {
     log('onApplicationEn');
     
-    // starts the task in the background
-    const bgTask = yield fork(makeRequestsTask);
+    // starts the tasks in the background
+    const bgMakeRequestsTask = yield fork(makeRequestsTask);
+    const bgCheckRequestStatusTask = yield fork(checkRequestStatusTask);
     
     // wait for the user stop action
     yield take(APPLICATION_DIS);
 
     // user clicked stop. cancel the background task
     // this will cause the forked bgSync task to jump into its finally block
-    yield cancel(bgTask)
+    yield cancel(bgMakeRequestsTask);
+    yield cancel(bgCheckRequestStatusTask);
 }
 
 export function* requestSaga() {
     yield all([
-        yield takeEvery(APPLICATION_EN, onApplicationEn),
-        // yield takeEvery(APPLICATION_DIS, onApplicationDis)
+        yield takeEvery(APPLICATION_EN, onApplicationEn)
     ]);
 }
