@@ -1,3 +1,4 @@
 # Application config
 
-API_URL: '/api'
+Swagger:
+  url: '/flexxnn_jibrel_1.0.0_swagger.json'

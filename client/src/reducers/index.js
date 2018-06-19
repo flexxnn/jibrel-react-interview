@@ -8,7 +8,7 @@ import { routerReducer, routerMiddleware } from 'react-router-redux';
 
 import rootSaga from './../sagas';
 
-import * as applicationState from './applicationState';
+import * as appState from './appState';
 import * as requests from './requests';
 
 // eslint-disable-next-line no-underscore-dangle
@@ -19,7 +19,7 @@ export const sagaMiddleware = createSagaMiddleware(rootSaga);
 const routerHistoryMiddleware = routerMiddleware(history);
 const store = createStore(
     combineReducers({
-        ...applicationState,
+        ...appState,
         ...requests,
         router: routerReducer
     }),

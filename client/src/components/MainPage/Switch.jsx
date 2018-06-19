@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { toggleState } from '../../actions/applicationState';
+import { appToggleState } from '../../actions/appState';
 
 import './Switch.scss';
 
@@ -16,7 +16,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-    onClick: () => dispatch(toggleState())
+    onClick: () => dispatch(appToggleState())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(SwitchControl);

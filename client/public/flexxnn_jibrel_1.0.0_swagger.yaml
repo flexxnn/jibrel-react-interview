@@ -1,0 +1,170 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+servers:
+  - description: Jibrel network interview test API
+    url: https://virtserver.swaggerhub.com/flexxnn/jibrel/1.0.0
+info:
+  description: This is a simple API
+  version: "1.0.0"
+  title: Simple API
+  contact:
+    email: flexxnn@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: all
+    description: Avaliable for all users
+paths:
+  /items:
+    get:
+      tags:
+        - all
+      summary: Get list with requests
+      operationId: getItems
+      parameters:
+        - in: query
+          name: skip
+          required: false
+          description: Skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: limit
+          required: false
+          description: Maximum amount of items, that can be retreived from server
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 1000
+      responses:
+        '200':
+          description: existing items list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RequestItem'
+        '400':
+          description: 'server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorObject'
+
+  /item:
+    get:
+      tags:
+        - all
+      summary: Get only one request item object
+      operationId: getItem
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Item id
+      responses:
+        '200':
+          description: Get existing item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestItem'
+        '400':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorObject'
+    post:
+      tags:
+        - all
+      operationId: postItem
+      summary: 'Post new item to server'
+      description: 'Adds new item to system'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestPayload:
+                  type: object
+                  description: 'Random JSON payload'
+      responses:
+        200:
+          description: 'Item created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestItem'
+
+components:
+  schemas:
+    ErrorObject:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: 'INVALID_INPUT'
+        description:
+          type: string
+          description: Error description
+          example: 'invalid input, object invalid'
+          
+    RequestItem:
+      type: object
+      required:
+        - id
+        - payload
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 'The item ID on server'
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        requestPayload: 
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+          example: '2017-07-21T17:32:28Z'
+          description: 'The date-time notation as defined by RFC 3339, section 5.6'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2017-07-21T17:32:28Z'
+          description: 'The date-time notation as defined by RFC 3339, section 5.6'
+        status:
+          type: string
+          enum:
+            - new
+            - pending
+            - working
+            - success
+            - error
+          description: > 
+            Item status:
+              * new - Was created
+              * pending - In queue
+              * working - Processing
+              * success - Success
+              * error - There some error
+
+    PostItem:
+      type: object
+      required:
+        - payload
+      properties:
+        payload:
+          type: object
+          description: 'Some random JSON, that we post to server'
+          example: {}
