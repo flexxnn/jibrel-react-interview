@@ -1,6 +1,6 @@
 import { all } from 'redux-saga/effects'
 
-import { applicationStateSaga } from './applicationState';
+import { applicationStateSaga } from './applicationStateSaga';
 
 export default function* rootSaga() {
     yield all([
