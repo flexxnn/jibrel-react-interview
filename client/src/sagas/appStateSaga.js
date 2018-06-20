@@ -15,6 +15,6 @@ function* toggleApplicationState() {
         yield put(appEnable());
 }
 
-export function* appStateSaga() {
+export default function* appStateSaga() {
     yield takeEvery(APPLICATION_TOGGLE_STATE, toggleApplicationState);
 }

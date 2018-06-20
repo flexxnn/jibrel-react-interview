@@ -22,13 +22,18 @@ paths:
     x-swagger-router-controller: items
     get:
       produces:
-        - application-json
+        - application/json
       parameters:
         - description: Item id
           in: query
           name: id
           required: true
           type: string
+        - description: Receive only status
+          in: query
+          name: onlyStatus
+          required: false
+          type: integer
       responses:
         '200':
           description: Get existing item
@@ -44,16 +49,17 @@ paths:
       summary: Get only one request item object
     post:
       produces:
-        - application-json    
+        - application/json    
       parameters:
         - in: body
           name: body
+          required: true
           schema:
+            type: object
             properties:
               requestPayload:
-                description: Random JSON payload
+                description: Request JSON payload
                 type: object
-            type: object
       responses:
         '200':
           description: Item created
