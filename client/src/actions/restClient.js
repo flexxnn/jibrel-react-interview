@@ -11,7 +11,10 @@ export const ITEM_UPDATE = 'ITEM_UPDATE';
 export function restItemPostSuccess(postedItem) {
     return {
         type: REST_ITEM_POST_SUCCESS,
-        payload: postedItem
+        payload: { 
+            ...postedItem,
+            type: 'REST'
+        }
     }
 }
 

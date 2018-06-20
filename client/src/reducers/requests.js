@@ -7,8 +7,13 @@ const {
     ITEM_UPDATE
 } = actions;
 
+// const items100k = [];
+// for (let i = 0; i < 100000; i++)
+//     items100k.push({id: 'id'+i, status: 'error'});
+
 // eslint-disable-next-line import/prefer-default-export
 export function requests(state = {
+    // items: [...items100k],
     items: [],
     restErrorCount: 0,
     restRequestCount: 0
@@ -26,8 +31,8 @@ export function requests(state = {
             return {
                 ...state,
                 items: [
-                    { type: 'REST', ...action.payload },
-                    ...state.items
+                    ...state.items,
+                    { ...action.payload },
                 ],
                 restRequestCount: state.restRequestCount + 1
             };
@@ -43,7 +48,7 @@ export function requests(state = {
                 ]
             };
         }
-        
+
         case REST_ITEM_POST_START:
         default:
             return state;

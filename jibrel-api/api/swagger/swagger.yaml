@@ -70,6 +70,7 @@ paths:
       description: Adds new item to system
       operationId: postItem
       summary: Post new item to server
+
   /items:
     x-swagger-router-controller: items
     get:
@@ -104,6 +105,7 @@ paths:
         - all
       operationId: getItems
       summary: Get list with requests
+      
   /swagger:
     x-swagger-pipe: swagger_raw_cors
 
@@ -133,6 +135,8 @@ definitions:
         format: uuid
         type: string
       requestPayload:
+        type: object
+      workerResult:
         type: object
       status:
         description: |
