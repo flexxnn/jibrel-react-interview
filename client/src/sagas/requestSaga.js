@@ -49,7 +49,7 @@ function* checkRequestStatusTask() {
         // const rest = yield getContext('restClient');
         while (true) {
             log('xxx');
-            yield call(delay, 100);
+            yield call(delay, 100); 
         }                
     } finally {
         if (yield cancelled()) {

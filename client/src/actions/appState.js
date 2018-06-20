@@ -33,6 +33,7 @@ export function appSetStarted() {
 }
 
 export function appSetFatalError(errorText) {
+    error(`Application fatal error ${errorText}`);
     return {
         type: APPLICATION_FATAL_ERROR,
         payload: {

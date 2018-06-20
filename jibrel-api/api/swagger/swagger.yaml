@@ -1,0 +1,159 @@
+swagger: '2.0'
+info:
+  contact:
+    email: flexxnn@gmail.com
+  description: This is a simple API
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  title: Simple API
+  version: 1.0.0
+host: localhost:10010
+basePath: /
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /item:
+    x-swagger-router-controller: items
+    get:
+      produces:
+        - application-json
+      parameters:
+        - description: Item id
+          in: query
+          name: id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Get existing item
+          schema:
+            $ref: '#/definitions/RequestItem'
+        '400':
+          description: Server error
+          schema:
+            $ref: '#/definitions/ErrorObject'
+      tags:
+        - all
+      operationId: getItem
+      summary: Get only one request item object
+    post:
+      produces:
+        - application-json    
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              requestPayload:
+                description: Random JSON payload
+                type: object
+            type: object
+      responses:
+        '200':
+          description: Item created
+          schema:
+            $ref: '#/definitions/RequestItem'
+      tags:
+        - all
+      description: Adds new item to system
+      operationId: postItem
+      summary: Post new item to server
+  /items:
+    x-swagger-router-controller: items
+    get:
+      parameters:
+        - description: Skip for pagination
+          format: int32
+          in: query
+          minimum: 0
+          name: skip
+          required: false
+          type: integer
+        - description: Maximum amount of items, that can be retreived from server
+          format: int32
+          in: query
+          maximum: 1000
+          minimum: 1
+          name: limit
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: existing items list
+          schema:
+            items:
+              $ref: '#/definitions/RequestItem'
+            type: array
+        '400':
+          description: server error
+          schema:
+            $ref: '#/definitions/ErrorObject'
+      tags:
+        - all
+      operationId: getItems
+      summary: Get list with requests
+  /swagger:
+    x-swagger-pipe: swagger_raw_cors
+
+definitions:
+  ErrorObject:
+    type: object
+    properties:
+      description:
+        description: Error description
+        example: 'invalid input, object invalid'
+        type: string
+      error:
+        description: Error code
+        example: INVALID_INPUT
+        type: string
+        
+  RequestItem:
+    properties:
+      createdAt:
+        description: The date-time notation as defined by RFC 3339, section 5.6
+        example: '2017-07-21T17:32:28Z'
+        format: date-time
+        type: string
+      id:
+        description: The item ID on server
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        format: uuid
+        type: string
+      requestPayload:
+        type: object
+      status:
+        description: |
+          Item status:
+            * new - Was created
+            * pending - In queue
+            * working - Processing
+            * success - Success
+            * error - There some error
+        enum:
+          - new
+          - pending
+          - working
+          - success
+          - error
+        type: string
+      updatedAt:
+        description: 'The date-time notation as defined by RFC 3339, section 5.6'
+        example: '2017-07-21T17:32:28Z'
+        format: date-time
+        type: string
+    required:
+      - id
+      - status
+    type: object
+tags:
+  - description: Avaliable for all users
+    name: all
+x-components: {}
+

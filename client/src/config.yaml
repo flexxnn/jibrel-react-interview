@@ -1,4 +1,4 @@
 # Application config
 
 Swagger:
-  url: '/flexxnn_jibrel_1.0.0_swagger.json'
+  url: 'http://localhost:10010/swagger'
