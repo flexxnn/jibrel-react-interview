@@ -4,7 +4,8 @@ const {
     REST_ITEM_POST_START,
     REST_ITEM_POST_ERROR,
     REST_ITEM_POST_SUCCESS,
-    ITEM_UPDATE
+    ITEM_UPDATE,
+    ITEM_UPDATE_ERROR
 } = actions;
 
 // const items100k = [];
@@ -38,6 +39,18 @@ export function requests(state = {
             };
         
         case ITEM_UPDATE: {
+            // find the item
+            const itemIndex = state.items.findIndex((item) => item.id === action.payload.id);
+            return {
+                ...state,
+                items: [...state.items.slice(0, itemIndex), // items before
+                    { ...state.items[itemIndex], ...action.payload }, // this item
+                    ...state.items.slice(itemIndex+1) // items after
+                ]
+            };
+        }
+
+        case ITEM_UPDATE_ERROR: {
             // find the item
             const itemIndex = state.items.findIndex((item) => item.id === action.payload.id);
             return {

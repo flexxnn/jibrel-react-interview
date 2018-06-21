@@ -14,6 +14,7 @@ function postItem(req, res) {
 
     restQueue.createItem(requestPayload).then(
         (createdItem) => {
+            //res.status(400).json({ message: "Item creation failture", code: "SERVER_ERROR" });
             res.json(createdItem);
         },
         ()=> {

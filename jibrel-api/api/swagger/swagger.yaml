@@ -113,11 +113,11 @@ definitions:
   ErrorObject:
     type: object
     properties:
-      description:
+      message:
         description: Error description
         example: 'invalid input, object invalid'
         type: string
-      error:
+      status:
         description: Error code
         example: INVALID_INPUT
         type: string

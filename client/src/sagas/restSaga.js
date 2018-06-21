@@ -1,11 +1,13 @@
 import { all, put, call, takeEvery, select, 
-            getContext, cancelled, fork, take, cancel, actionChannel } from 'redux-saga/effects'
+            getContext, cancelled, fork, take, cancel } from 'redux-saga/effects'
 import { delay, channel, buffers } from 'redux-saga';
 import { logger } from '../utils';
+
 import actions from '../actions';
+import config from '../config.yaml';
 
 // eslint-disable-next-line
-const [ log ] = logger('requestSaga');
+const [ log, error ] = logger('requestSaga');
 
 const {
     APPLICATION_EN,
@@ -13,8 +15,67 @@ const {
     restItemPostStart,
     restItemPostSuccess,
     restItemPostError,
-    restItemUpdate
+    restItemUpdate,
+    restItemUpdateError
 } = actions;
+
+const {
+    checkerConf,
+    pusherConf
+} = config.RestClient;
+
+const MAX_CHECK_PARALLEL = (checkerConf.parallelTasksCount > 0) ? checkerConf.parallelTasksCount : 1;
+const CHECKER_TIMEOUT = checkerConf.timeoutBetweenRequests;
+const PUSHER_TIMEOUT = pusherConf.timeoutBetweenRequests;
+const CHECKER_THROTTLE = checkerConf.itemUpdateThrottle;
+
+function* callRestAPIMethod({methodName, requestPayload = {}, 
+        successAction = null, errorAction = null, throwError = false, actionPayload = {}}) {
+    const rest = yield getContext('restClient');
+    try {
+        const result = yield call([rest, rest.apis.all[methodName]], requestPayload);
+        const payload = {
+            methodName,
+            success: true,
+            status: result.status,
+            req: requestPayload,
+            res: result.body || {},
+            ...actionPayload
+        };
+        if (successAction) {
+            yield put(successAction(payload));
+        }
+        yield payload;
+    } catch (e) {
+        if (errorAction) {
+            if (e instanceof TypeError) {
+                // network error, failed to fetch
+                const payload = {
+                    methodName,
+                    success: false,
+                    status: 0,
+                    req: requestPayload,
+                    res: { code: 'NETWORK_ERROR', message: e.toString() },
+                    ...actionPayload
+                };
+                yield put(errorAction(payload));
+            } else if (e instanceof Error) {
+                // REST API server error
+                const payload = {
+                    methodName,
+                    success: false,
+                    status: e.status,
+                    req: requestPayload,
+                    res: (e.response) ? e.response.body : {},
+                    ...actionPayload
+                };
+                yield put(errorAction(payload));
+            }
+        }
+        if (throwError)
+            throw e;
+    }
+}
 
 function getItemData() {
     return { abc: Math.random(1000) };
@@ -22,22 +83,26 @@ function getItemData() {
 
 function* makeRequestsTask() {
     try {
-        const rest = yield getContext('restClient');
         while (true) {
             const itemData = getItemData();
             yield put(restItemPostStart(itemData));
             try {
-                // make swagger request
-                const item = yield call([rest, rest.apis.all.postItem], {
-                    body: { requestPayload: itemData }
+                yield call(callRestAPIMethod, {
+                    methodName: 'postItem',
+                    requestPayload: {
+                        body: { requestPayload: itemData }
+                    },
+                    successAction: restItemPostSuccess,
+                    errorAction: restItemPostError,
+                    throwError: true
                 });
-                log('new added', item.body.id);
-                yield put(restItemPostSuccess(item.body));
             } catch (e) {
-                log('error', e);
-                yield put(restItemPostError(e));
+                error(e);
+                yield delay(1000);
             }
-            // yield delay(500);
+
+            if (PUSHER_TIMEOUT > 0)
+                yield delay(PUSHER_TIMEOUT);
         }
     } finally {
         if (yield cancelled()) {
@@ -51,15 +116,22 @@ function* makeRequestsTask() {
 let ch = 0;
 
 function* itemUpdateThread(chan) {
-    let chnum = ch++;
-    log('thread created ',chnum);
+    const chnum = ch++;
+    log('task created ', chnum);
     try {
-        const rest = yield getContext('restClient');
         while (true) {
+            // log('check '+chnum+' '+id);
             const id = yield take(chan);
-            log('check '+chnum+' '+id);
-            const item = yield call([rest, rest.apis.all.getItem], { id });
-            yield put(restItemUpdate(item.body));
+
+            yield call(callRestAPIMethod, {
+                methodName: 'getItem',
+                requestPayload: { id },
+                successAction: restItemUpdate,
+                errorAction: (e) => (e.res.code !== 'NETWORK_ERROR' && restItemUpdateError(e))
+            });
+
+            if (CHECKER_TIMEOUT > 0)
+                yield delay(CHECKER_TIMEOUT);
         }
     } finally {
         if (yield cancelled()) {
@@ -73,16 +145,16 @@ function* checkRequestStatusTask() {
         (item.type === 'REST' && 
             item.status !== 'success' && 
             item.status !== 'error' && 
-            ( !item.updateTimestamp || (Date.now() - item.updateTimestamp) > 1000)
+            ( !item.updateTimestamp || (Date.now() - item.updateTimestamp) > CHECKER_THROTTLE)
         );
    
     try {
-        // create a channel to queue incoming requests
         const buffer = buffers.expanding(1);
+        // create a channel to queue incoming requests
         const chan = channel(buffer);
         
         // create 3 worker 'threads'
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < MAX_CHECK_PARALLEL; i++) {
             yield fork(itemUpdateThread, chan);
         }
 

@@ -7,12 +7,13 @@ export const REST_ITEM_POST_ERROR = 'REST_ITEM_POST_ERROR';
 export const REST_ITEM_POST_START = 'REST_ITEM_POST_START';
 
 export const ITEM_UPDATE = 'ITEM_UPDATE';
+export const ITEM_UPDATE_ERROR = 'ITEM_UPDATE_ERROR';
 
-export function restItemPostSuccess(postedItem) {
+export function restItemPostSuccess(successPayload) {
     return {
         type: REST_ITEM_POST_SUCCESS,
         payload: { 
-            ...postedItem,
+            ...successPayload.res,
             type: 'REST'
         }
     }
@@ -31,11 +32,23 @@ export function restItemPostStart() {
     }
 }
 
-export function restItemUpdate(data) {
+export function restItemUpdate(successPayload) {
     return {
         type: ITEM_UPDATE,
         payload: { 
-            ...data,
+            ...successPayload.res,
+            updateTimestamp: +(new Date())
+        }
+    }
+}
+
+export function restItemUpdateError(e) {
+    return {
+        type: ITEM_UPDATE_ERROR,
+        payload: {
+            status: 'error',
+            error: e.res,
+            id: e.req.id,
             updateTimestamp: +(new Date())
         }
     }

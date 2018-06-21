@@ -2,3 +2,21 @@
 
 Swagger:
   url: 'http://localhost:10010/api/swagger'
+
+RestClient:
+  # request checker configuration
+  checkerConf:
+    # task count for item checker
+    # min - 1
+    parallelTasksCount: 3
+    # timeout between requests in ms
+    # 0 - no timeout
+    timeoutBetweenRequests: 0
+    # prohibit refreshing a item more than once per second
+    itemUpdateThrottle: 1000
+  
+  # request pusher configuration
+  pusherConf:
+    # timeout between requests in ms
+    # 0 - no timeout
+    timeoutBetweenRequests: 0

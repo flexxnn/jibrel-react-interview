@@ -21,6 +21,9 @@ function* initAPI() {
             restSaga()
         ]);
     } catch (e) {
+        console.log(e instanceof TypeError)
+        console.error(e);
+        console.log(e, e.status);
         yield put(appSetFatalError(`Can't init swagger. ${e}`));
     }
 }
