@@ -42,7 +42,7 @@ class Worker {
                 await tick();
                 continue;
             }
-            console.log(1);
+
             try {
                 const result = await this._processItem(item);
                 await this._itemQueue.updateItem(item.id, result);

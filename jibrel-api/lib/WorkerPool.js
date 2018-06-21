@@ -6,7 +6,6 @@ class WorkerPool {
         this._workers = [];
         for (let i = 0; i < numWorkers; i++)
             this._workers.push(new Worker(itemQueue));
-        console.log(this);
     }
 
     run() {
