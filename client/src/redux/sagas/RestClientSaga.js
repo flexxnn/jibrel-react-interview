@@ -1,5 +1,6 @@
 import { all, put, call, select, 
-            getContext, setContext, cancelled, fork, take, cancel } from 'redux-saga/effects'
+        getContext, setContext, cancelled, 
+        fork, take, cancel } from 'redux-saga/effects'        
 import { delay, channel, buffers } from 'redux-saga';
 import { logger } from '../../utils';
 
@@ -7,7 +8,7 @@ import actions from '../actions';
 import config from '../../config.yaml';
 
 import API from './api';
-const { restAPICall, restAPIInit } = API;
+const { /* restAPICall, */ restAPICallCancellable, restAPIInit } = API;
 
 const [ log, error ] = logger('requestSaga');
 
@@ -35,7 +36,11 @@ const PUSHER_TIMEOUT = pusherConf.timeoutBetweenRequests;
 const CHECKER_THROTTLE = checkerConf.itemUpdateThrottle;
 
 function getItemData() {
-    return { abc: Math.random(1000) };
+    let s = '';
+    for (let i = 0; i < 20000; i++)
+        s = s + i;
+    console.log(s.length);
+    return { abc: Math.random()*1000, s };
 }
 
 function* makeRequestsTask() {
@@ -44,7 +49,7 @@ function* makeRequestsTask() {
             const itemData = getItemData();
             yield put(restItemPostStart(itemData));
             try {
-                yield call(restAPICall, {
+                yield call(restAPICallCancellable, {
                     methodName: 'postItem',
                     requestPayload: {
                         body: { requestPayload: itemData }
@@ -80,7 +85,7 @@ function* itemUpdateThread(chan) {
             // log('check '+chnum+' '+id);
             const id = yield take(chan);
 
-            yield call(restAPICall, {
+            yield call(restAPICallCancellable, {
                 methodName: 'getItem',
                 requestPayload: { id },
                 successAction: restItemUpdate,
@@ -151,7 +156,7 @@ export default function* restClientSaga() {
         yield take(APPLICATION_EN);
         try {
             if (!(yield getContext('restClient'))) {
-                const restClient = yield restAPIInit();
+                const restClient = yield call(restAPIInit);
                 yield setContext({ restClient });
             }
 

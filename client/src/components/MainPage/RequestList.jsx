@@ -18,7 +18,7 @@ const rowRenderer = (items, rowClick) => ({
         <div className={`row ${(index%2)?'odd':'even'} ${(rowClick)?'clickable':''}`} 
                 key={key} style={style} onClick={rowClick && rowClick(items[index].id)}>
             <div className="request-id">#{items[index].id}</div>
-            <div className="request-payload">{JSON.stringify(items[index].requestPayload)}</div>
+            <div className="request-payload">{JSON.stringify(items[index].requestPayload).substr(0, 250)}</div>
             <div className="request-status">{items[index].status}</div>
         </div>
     );

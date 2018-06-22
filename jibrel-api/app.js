@@ -2,6 +2,8 @@
 
 var SwaggerExpress = require('swagger-express-mw');
 var app = require('express')();
+var bodyParser = require('body-parser')
+
 module.exports = app; // for testing
 
 // const ItemQueue = require('./lib/ItemQueue');
@@ -15,12 +17,10 @@ var config = {
 SwaggerExpress.create(config, function(err, swaggerExpress) {
   if (err) { throw err; }
 
-  // swaggerExpress.runner.restQueue = restQueue;
-
   // install middleware
+  app.use(bodyParser.json({limit: 100 * 1024 * 1024}));
+  app.use(bodyParser.raw({limit: 100 * 1024 * 1024}));  
   swaggerExpress.register(app);  
-
-  // console.log(swaggerExpress);
 
   var port = process.env.PORT || 10010;
   app.listen(port);
