@@ -6,7 +6,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import MainPage from './MainPage';
 // import LoginPage from './page/login/loginPage';
-import store, { history } from '../reducers';
+import store, { history } from '../redux/reducers';
 
 import R from '../routes.yaml';
 

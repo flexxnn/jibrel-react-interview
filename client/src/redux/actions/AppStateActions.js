@@ -1,6 +1,3 @@
-import { logger } from '../utils';
-// eslint-disable-next-line
-const [ log, error, warn ]= logger('actions/applicationState');
 
 export const APPLICATION_EN = 'APPLICATION_EN';
 export const APPLICATION_DIS = 'APPLICATION_DIS';
@@ -33,7 +30,6 @@ export function appSetStarted() {
 }
 
 export function appSetFatalError(errorText) {
-    error(`Application fatal error ${errorText}`);
     return {
         type: APPLICATION_FATAL_ERROR,
         payload: {

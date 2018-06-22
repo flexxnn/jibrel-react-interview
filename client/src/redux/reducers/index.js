@@ -8,14 +8,14 @@ import { routerReducer, routerMiddleware } from 'react-router-redux';
 
 import rootSaga from './../sagas';
 
-import * as appState from './appState';
-import * as requests from './requests';
+import * as appState from './AppStateReducer';
+import * as requests from './RequestsReducer';
 
 // eslint-disable-next-line no-underscore-dangle
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 export const history = createHistory();
-export const sagaMiddleware = createSagaMiddleware(rootSaga);
+export const sagaMiddleware = createSagaMiddleware();
 const routerHistoryMiddleware = routerMiddleware(history);
 const store = createStore(
     combineReducers({

@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { appToggleState } from '../../actions/appState';
+import { appToggleState } from '../../redux/actions/AppStateActions';
 
 import './Switch.scss';
 
@@ -11,7 +11,7 @@ const SwitchControl = ({state, onClick}) => (
 
 const mapStateToProps = (state) => {
     return {
-        state: state.applicationState.applicationEnabled
+        state: state.appState.applicationEnabled
     };
 }
 

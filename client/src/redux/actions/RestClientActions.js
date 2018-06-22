@@ -1,6 +1,3 @@
-import { logger } from '../utils';
-// eslint-disable-next-line
-const [ log, error, warn ]= logger('actions/applicationState');
 
 export const REST_ITEM_POST_SUCCESS = 'REST_ITEM_POST_SUCCESS';
 export const REST_ITEM_POST_ERROR = 'REST_ITEM_POST_ERROR';

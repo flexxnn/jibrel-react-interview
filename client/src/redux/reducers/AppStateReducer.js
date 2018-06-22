@@ -8,11 +8,10 @@ const {
 } = actions;
 
 // eslint-disable-next-line import/prefer-default-export
-export function applicationState(state = {
+export function appState(state = {
     applicationEnabled: false,
     applicationStarted: false,
-    fatalError: '',
-    requestInterval: 1000
+    fatalError: ''
 }, action) {
     switch (action.type)
     {

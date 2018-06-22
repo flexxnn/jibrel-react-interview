@@ -8,7 +8,7 @@ const {
 } = actions;
 
 function* toggleApplicationState() {
-    const state = yield select(state => state.applicationState);
+    const state = yield select(state => state.appState);
     if (state.applicationEnabled)
         yield put(appDisable());
     else

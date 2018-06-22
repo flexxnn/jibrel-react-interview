@@ -1,17 +1,22 @@
-import { all, put, call, takeEvery, select, 
-            getContext, cancelled, fork, take, cancel } from 'redux-saga/effects'
+import { all, put, call, select, 
+            getContext, setContext, cancelled, fork, take, cancel } from 'redux-saga/effects'
 import { delay, channel, buffers } from 'redux-saga';
-import { logger } from '../utils';
+import { logger } from '../../utils';
 
 import actions from '../actions';
-import config from '../config.yaml';
+import config from '../../config.yaml';
 
-// eslint-disable-next-line
+import API from './api';
+const { restAPICall, restAPIInit } = API;
+
 const [ log, error ] = logger('requestSaga');
 
 const {
     APPLICATION_EN,
     APPLICATION_DIS,
+    appDisable,
+    appSetFatalError,
+
     restItemPostStart,
     restItemPostSuccess,
     restItemPostError,
@@ -29,54 +34,6 @@ const CHECKER_TIMEOUT = checkerConf.timeoutBetweenRequests;
 const PUSHER_TIMEOUT = pusherConf.timeoutBetweenRequests;
 const CHECKER_THROTTLE = checkerConf.itemUpdateThrottle;
 
-function* callRestAPIMethod({methodName, requestPayload = {}, 
-        successAction = null, errorAction = null, throwError = false, actionPayload = {}}) {
-    const rest = yield getContext('restClient');
-    try {
-        const result = yield call([rest, rest.apis.all[methodName]], requestPayload);
-        const payload = {
-            methodName,
-            success: true,
-            status: result.status,
-            req: requestPayload,
-            res: result.body || {},
-            ...actionPayload
-        };
-        if (successAction) {
-            yield put(successAction(payload));
-        }
-        yield payload;
-    } catch (e) {
-        if (errorAction) {
-            if (e instanceof TypeError) {
-                // network error, failed to fetch
-                const payload = {
-                    methodName,
-                    success: false,
-                    status: 0,
-                    req: requestPayload,
-                    res: { code: 'NETWORK_ERROR', message: e.toString() },
-                    ...actionPayload
-                };
-                yield put(errorAction(payload));
-            } else if (e instanceof Error) {
-                // REST API server error
-                const payload = {
-                    methodName,
-                    success: false,
-                    status: e.status,
-                    req: requestPayload,
-                    res: (e.response) ? e.response.body : {},
-                    ...actionPayload
-                };
-                yield put(errorAction(payload));
-            }
-        }
-        if (throwError)
-            throw e;
-    }
-}
-
 function getItemData() {
     return { abc: Math.random(1000) };
 }
@@ -87,7 +44,7 @@ function* makeRequestsTask() {
             const itemData = getItemData();
             yield put(restItemPostStart(itemData));
             try {
-                yield call(callRestAPIMethod, {
+                yield call(restAPICall, {
                     methodName: 'postItem',
                     requestPayload: {
                         body: { requestPayload: itemData }
@@ -123,7 +80,7 @@ function* itemUpdateThread(chan) {
             // log('check '+chnum+' '+id);
             const id = yield take(chan);
 
-            yield call(callRestAPIMethod, {
+            yield call(restAPICall, {
                 methodName: 'getItem',
                 requestPayload: { id },
                 successAction: restItemUpdate,
@@ -181,7 +138,7 @@ function* checkRequestStatusTask() {
             // console.log(pendingItems);
             yield all(pendingItems.map(item => put(chan, item.id)));
             // console.log('all in CH ');
-        }                
+        }
     } finally {
         if (yield cancelled()) {
             log('checkRequestStatusTask stopped');
@@ -189,24 +146,30 @@ function* checkRequestStatusTask() {
     }
 }
 
-function* onApplicationEn() {
-    log('onApplicationEn');
-    
-    // starts the tasks in the background
-    const bgMakeRequestsTask = yield fork(makeRequestsTask);
-    const bgCheckRequestStatusTask = yield fork(checkRequestStatusTask);
-    
-    // wait for the user stop action
-    yield take(APPLICATION_DIS);
+export default function* restClientSaga() {
+    while (true) {
+        yield take(APPLICATION_EN);
+        try {
+            if (!(yield getContext('restClient'))) {
+                const restClient = yield restAPIInit();
+                yield setContext({ restClient });
+            }
 
-    // user clicked stop. cancel the background task
-    // this will cause the forked bgSync task to jump into its finally block
-    yield cancel(bgMakeRequestsTask);
-    yield cancel(bgCheckRequestStatusTask);
-}
+            // starts the tasks in the background
+            const bgMakeRequestsTask = yield fork(makeRequestsTask);
+            const bgCheckRequestStatusTask = yield fork(checkRequestStatusTask);
 
-export default function* restSaga() {
-    yield all([
-        yield takeEvery(APPLICATION_EN, onApplicationEn)
-    ]);
+            // wait for the user stop action
+            yield take(APPLICATION_DIS);
+
+            // user clicked stop. cancel the background task
+            // this will cause the forked bgSync task to jump into its finally block
+            yield cancel(bgMakeRequestsTask);
+            yield cancel(bgCheckRequestStatusTask);
+        } catch (e) {
+            yield put(appDisable());
+            yield put(appSetFatalError(`Fatal error, application stopped. (${e})`));
+            error('Error', e)
+        }
+    }
 }
