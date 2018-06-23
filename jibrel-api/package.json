@@ -10,7 +10,9 @@
   "dependencies": {
     "express": "^4.12.3",
     "node-uuid": "^1.4.8",
-    "swagger-express-mw": "^0.1.0"
+    "sockjs": "^0.3.19",
+    "swagger-express-mw": "^0.1.0",
+    "websocket": "^1.0.26"
   },
   "devDependencies": {
     "should": "^7.1.0",

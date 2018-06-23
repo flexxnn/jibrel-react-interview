@@ -37,7 +37,7 @@ function getItem(req, res) {
 }
 
 function getItems(req, res) {
-    res.status(400).json({ message: 'not implemented', code: "NOT_IMPLEMENTED" })
+    res.status(400).json({ message: 'not implemented', code: "NOT_IMPLEMENTED" });
 }
 
 module.exports = {

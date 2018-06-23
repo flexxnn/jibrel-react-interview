@@ -1,33 +1,37 @@
 'use strict';
 
-var SwaggerExpress = require('swagger-express-mw');
-var app = require('express')();
-var bodyParser = require('body-parser')
+const SwaggerExpress = require('swagger-express-mw');
+const express = require('express');
+// const bodyParser = require('body-parser')
+const WebSocketServer = require('websocket').server;
+const http = require('http');
 
-module.exports = app; // for testing
-
-// const ItemQueue = require('./lib/ItemQueue');
-// const WorkerPool = require('./lib/WorkerPool');
+const messaging = require('./ws');
 
 var config = {
   appRoot: __dirname // required config
 };
 
+const app = express();
+const httpServer = http.createServer(app);
 
 SwaggerExpress.create(config, function(err, swaggerExpress) {
   if (err) { throw err; }
 
   // install middleware
-  app.use(bodyParser.json({limit: 100 * 1024 * 1024}));
-  app.use(bodyParser.raw({limit: 100 * 1024 * 1024}));  
+  app.use('/', express.static('./static'));
   swaggerExpress.register(app);  
 
+  // start listen
   var port = process.env.PORT || 10010;
-  app.listen(port);
+  httpServer.listen(port, '0.0.0.0');
 
-  // workerPool.run();
-
-  if (swaggerExpress.runner.swagger.paths['/hello']) {
-    console.log('try this:\ncurl http://127.0.0.1:' + port + '/hello?name=Scott');
-  }
+  const wsServer = new WebSocketServer({
+    httpServer,
+    autoAcceptConnections: false
+  });
+  
+  new (messaging)(wsServer);
 });
+
+module.exports = app; // for testing

@@ -1,8 +1,10 @@
 import * as appState from './AppStateActions';
 import * as restClient from './RestClientActions';
+import * as ws from './WSActions';
 
 // eslint-disable-next-line import/prefer-default-export
 export default {
     ...appState,
-    ...restClient
+    ...restClient,
+    ...ws
 };

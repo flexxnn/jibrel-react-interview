@@ -73,7 +73,7 @@ function* makeRequestsTask() {
     }
 }
 
-// just to debug
+// just debug
 // @todo: remove it
 let ch = 0;
 
