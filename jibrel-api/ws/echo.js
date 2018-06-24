@@ -10,7 +10,7 @@ var mod = {
     disabled: false,
 
     // _checkAccess will be before, must return true or false
-    _checkAccess: function(sock, msg) {
+    checkAccess: function(sock, msg) {
         return true;
     },
 

@@ -1,7 +1,7 @@
 import { all, put, call, select, race, actionChannel,
     getContext, setContext, cancelled, 
     fork, take, cancel } from 'redux-saga/effects'        
-import { delay, eventChannel } from 'redux-saga';
+import { delay, eventChannel, channel, buffers } from 'redux-saga';
 import uuid from 'uuid/v4';
 
 import { logger } from '../../utils';
@@ -14,9 +14,8 @@ const {
 } = actions;
 
 const SOCKET_SEND = 'SOCKET_SEND';
-
-const ADDED_TO_QUEUE = 'ADDED_TO_QUEUE';
-const STATUS_UPDATED = 'STATUS_UPDATED';
+const CONNECTION_ESTABLISHED = 'CONNECTION_ESTABLISHED';
+const DISCONNECTED = 'DISCONNECTED';
 
 const [ log, error ] = logger('WSSaga');
 
@@ -26,6 +25,10 @@ function pingAction({message, req, res}){
         type: 'ACTION_PING'
     }
 }
+
+const connEstablishedAction = () => { 
+    return { type: CONNECTION_ESTABLISHED };
+};
 
 function watchMessages(socket) {
     return eventChannel((emit) => {
@@ -66,12 +69,71 @@ function* sendListener({ socket, sendChannel }) {
         }
     } finally {
         if (yield cancelled())
-            log('cancelled internalListener');
+            log('cancelled sendListener');
     }
 }
 
-function* send({ message, payload, sessionBuffer,
-        actionToCall = null, actionPayload = {}}) {
+function* recvListener({ recvChannel, sessionBuffer, connEstablishedTaskFn }) {
+    const messageChannel = channel(buffers.dropping(10));
+    let connEstablishedTask = null;
+    try {    
+        while (true) {
+            const msg = yield take(recvChannel);
+            log('recvListener', msg);
+
+            // catch connection error and exit from externalListener
+            // it will cancel internalListener too (see race doc)
+            if (msg.error || msg.close) {
+                if (connEstablishedTask)
+                    yield cancel(connEstablishedTask);
+                return;
+            }
+
+            if (msg.open) {
+                yield put(connEstablishedAction());
+                if (connEstablishedTaskFn)
+                    connEstablishedTask = yield fork(connEstablishedTaskFn, messageChannel);
+                
+                // yield send({
+                //     sessionBuffer,
+                //     message: 'echo.ping',
+                //     payload: { a: 1 },
+                //     actionToCall: pingAction
+                // });
+            }
+
+            if (msg.data) {
+                const messageName = msg.data.message;
+                if (sessionBuffer[messageName]) {
+                    yield put(sessionBuffer[messageName].actionToCall({ 
+                        res: msg.data.payload,
+                        req: sessionBuffer[messageName].msg,
+                        message: sessionBuffer[messageName].msg.message,
+                        ...sessionBuffer[messageName].actionPayload
+                    }));
+                    delete sessionBuffer[messageName];
+                } else {
+                    yield put(messageChannel, {
+                        message: messageName,
+                        payload: msg.data.payload || {}
+                    });
+                }
+            }
+        }
+    } finally {
+        if (yield cancelled())
+            log('cancelled recvListener');            
+        messageChannel.close();
+    }
+}
+
+function* send({ message, payload,
+    actionToCall = null, actionPayload = {}}) 
+{
+    const sessionBuffer = yield getContext('sessionBuffer');
+    if (!sessionBuffer)
+        throw new Error('You should call "send" from task, forked from socketTask');
+
     const msg = {
         message,
         payload
@@ -87,82 +149,47 @@ function* send({ message, payload, sessionBuffer,
     yield put({ type: SOCKET_SEND, payload: msg });
 }
 
-function* recvListener({ recvChannel, sessionBuffer }) {
+function* connectionEstablishedTask(messageChannel) {
+    log('connectionEstablishedTask started',messageChannel);
     try {
-        while (true) {
-            const msg = yield take(recvChannel);
-            log('recvListener', msg);
-
-            // catch connection error and exit from externalListener
-            // it will cancel internalListener too (see race doc)
-            if (msg.error || msg.close)
-                return;
-
-            if (msg.open) {
-                yield send({
-                    sessionBuffer,
-                    message: 'echo.ping',
-                    payload: { a: 1 },
-                    actionToCall: pingAction
-                });
-            }
-
-            if (msg.data) {
-                const messageName = msg.data.message;
-                switch(messageName) {
-                    case 'ADDED_TO_QUEUE': {
-                        break;
-                    }
-
-                    case 'STATUS_UPDATED': {
-                        break;
-                    }
-
-                    default:
-                        if (sessionBuffer[messageName]) {
-                            yield put(sessionBuffer[messageName].actionToCall({ 
-                                res: msg.data.payload,
-                                req: sessionBuffer[messageName].msg,
-                                message: sessionBuffer[messageName].msg.message,
-                                ...sessionBuffer[messageName].actionPayload
-                            }));
-                            delete sessionBuffer[messageName];
-                        }
-                        break;
-                }
-            }
+        while(true) {
+            yield delay(3000);
         }
     } finally {
         if (yield cancelled())
-            log('cancelled recvListener');
+            log('canceled connectionEstablishedTask');
     }
 }
 
-function* socketTask() {
-    let socket, recvChannel, sendChannel, sessionBuffer;    
+function* socketTask(connEstablishedTaskFn = null) {
+    let socket, recvChannel, sendChannel, sessionBuffer;
     try {
         while (true) {
-            sessionBuffer = {};
+            sessionBuffer = {};            
             socket = new WebSocket(config.WebsocketClient.url, 'echo-protocol');
             recvChannel = yield call(watchMessages, socket);
             sendChannel = yield actionChannel(SOCKET_SEND);
             
+            yield setContext({ sessionBuffer });
+
             yield race([
-                call(recvListener, { socket, recvChannel, sendChannel, sessionBuffer }), 
+                call(recvListener, { socket, recvChannel, sendChannel, sessionBuffer, connEstablishedTaskFn }), 
                 call(sendListener, { socket, recvChannel, sendChannel, sessionBuffer })
             ]);
 
             recvChannel.close();
             sendChannel.close();
+            socket.close(3999);
 
             // reconnect timeout
             yield delay(config.WebsocketClient.reconnectTimeout);
         }
     } finally {
         if (yield cancelled()) {
-            socket.close(4000, APPLICATION_DIS);
+            socket.close(4000);
             recvChannel.close();
             sendChannel.close();
+            // messageChannel.close();
             log('cancelled socketTask');
         }
     }
@@ -174,7 +201,7 @@ export default function* wsSaga() {
     while (true) {
         yield take(APPLICATION_EN);
         try {
-            const task = yield fork(socketTask);
+            const task = yield fork(socketTask, connectionEstablishedTask);
             
             yield take(APPLICATION_DIS);
 

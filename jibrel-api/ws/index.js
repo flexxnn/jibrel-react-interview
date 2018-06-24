@@ -1,15 +1,27 @@
-
 const fs            = require('fs');
 const path          = require('path');
+const uuid          = require('node-uuid');
 const basename      = path.basename(module.filename);
+const WebSocketServer = require('websocket').server;
+
 const log           = require('debug')('ws:log');
 const error         = require('debug')('ws:error');
 
 class Messaging {
-    constructor(sockServer) {
+    constructor(httpServer, context = {}) {
         this._modules = {};
+        this._clients = {};
+        this._context = context;
+
         this._loadModules();
-        sockServer.on('request', this._onWSRequest = this._onWSRequest.bind(this));        
+
+        this._sockServer = new WebSocketServer({
+            httpServer,
+            autoAcceptConnections: false
+        });
+
+        this._sockServer.on('request', this._onWSRequest = this._onWSRequest.bind(this));
+
         log("Messaging started");
     }
 
@@ -25,14 +37,17 @@ class Messaging {
             return;
         }
 
-        const connection = request.accept('echo-protocol', request.origin);
-        log('Connection accepted');
-
-        connection.send = (message, payload) => {
-            connection.sendUTF(JSON.stringify({ message, payload }));
+        const sock = request.accept('echo-protocol', request.origin);
+        sock._id = uuid.v4();
+        this._clients[sock._id] = {
+            conn: sock
         };
 
-        connection.on('message', (message) => {
+        sock.send = (message, payload) => {
+            sock.sendUTF(JSON.stringify({ message, payload }));
+        };
+
+        sock.on('message', (message) => {
             if (message.type === 'utf8') {
                 let msg;
                 try {
@@ -47,12 +62,19 @@ class Messaging {
                     return;
                 }
 
-                this._onMessage(connection, msg);
+                this._onMessage(sock, msg);
             }
         });
-        connection.on('close', (reasonCode, description) => {
+        
+        sock.on('close', (reasonCode, description) => {
+            // notify all modules, that connection is closed
+            Object.keys(this._modules).map(m => m.connClose && m.connClose(sock));
+            
+            delete this._clients[sock._id];
             log('Connection closed', reasonCode, description);
         });
+
+        log('Connection accepted');        
     }
 
     _loadModules()
@@ -92,7 +114,7 @@ class Messaging {
         }
 
         // we can't call _checkAccess directly from UI
-        if (methodName == '_checkAccess' || !module[methodName]) {
+        if (methodName == 'checkAccess' || methodName == 'connClose' || !module[methodName]) {
             sock.send(cb, {success: false, error: 'INVALID_METHOD'});
             return;
         }
@@ -109,9 +131,54 @@ class Messaging {
     
         // call method from module
         const method = module[methodName];
-        (method)(sock, msg);
+        method.call(module, sock, msg, this);
     }
 
+    static getServer(httpServer) {
+        return new WebSocketServer({
+            httpServer,
+            autoAcceptConnections: false
+        });
+    }
+
+    get context() {
+        return this._context;
+    }
+
+    get clients() {
+        return this._clients;
+    }
+
+    /**
+     * Sends message to connected clients
+     * 
+     * @param {String,Array} to - connectionId or array with connectionIds
+     * @param {String} message 
+     * @param {Object} payload 
+     */
+    sendTo(to, message, payload) {
+        if (typeof to === 'string' && this._clients[to] && this._clients[to].conn) {
+            this._clients[to].conn.send(message, payload);
+            return;
+        }
+        if (Array.isArray(to)) {
+            to.map(id => {
+                if (this._clients[id] && this._clients[id].conn)
+                    this._clients[id].conn.send(message, payload);
+            });
+            return;
+        }
+    }
+
+    /**
+     * Sends message to all connected clients
+     * 
+     * @param {String} message 
+     * @param {Object} payload 
+     */
+    broadcast(message, payload) {
+        this.sendTo(Object.keys(this._clients), message, payload);
+    }
 }
 
 module.exports = Messaging;

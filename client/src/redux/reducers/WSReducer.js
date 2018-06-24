@@ -2,14 +2,19 @@ import actions from '../actions';
 import { combineReducers } from 'redux';
 
 const {
-    WS_PENDING_MESSAGE
+    WS_ITEM_PENDING,
+    WS_ITEM_GOT_ID
 } = actions;
 
 function pendingItems(state = [], action) {
     switch (action.type)
     {
-        case WS_PENDING_MESSAGE:
+        case WS_ITEM_PENDING:
             return [...state, action.payload];
+
+        case WS_ITEM_GOT_ID: {
+            const id = action.payload.id;
+        }
 
         //     return { ...state, applicationEnabled: true };
         // case APPLICATION_DIS:

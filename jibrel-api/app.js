@@ -3,7 +3,6 @@
 const SwaggerExpress = require('swagger-express-mw');
 const express = require('express');
 // const bodyParser = require('body-parser')
-const WebSocketServer = require('websocket').server;
 const http = require('http');
 
 const messaging = require('./ws');
@@ -25,13 +24,8 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
   // start listen
   var port = process.env.PORT || 10010;
   httpServer.listen(port, '0.0.0.0');
-
-  const wsServer = new WebSocketServer({
-    httpServer,
-    autoAcceptConnections: false
-  });
-  
-  new (messaging)(wsServer);
+   
+  new (messaging)(httpServer);
 });
 
 module.exports = app; // for testing
