@@ -89,7 +89,10 @@ function* itemUpdateThread(chan) {
                 methodName: 'getItem',
                 requestPayload: { id },
                 successAction: restItemUpdate,
-                errorAction: (e) => (e.res.code !== 'NETWORK_ERROR' && restItemUpdateError(e))
+                errorAction: (e) => {
+                    if (e && e.res && e.res.code !== 'NETWORK_ERROR')
+                        return restItemUpdateError(e);
+                }
             });
 
             if (CHECKER_TIMEOUT > 0)

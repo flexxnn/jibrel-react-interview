@@ -68,8 +68,7 @@ export function wsItemPostAction({req, res}) {
         }
     else
         return {
-            type: REST_ITEM_POST_ERROR,
-            e: res.code
+            type: REST_ITEM_POST_ERROR
         };
 }
 
@@ -83,12 +82,22 @@ export function wsItemUpdateAction(payload) {
     }
 }
 
-export function wsItemCheckAction({res}) {
-    return {
-        type: WS_ITEM_CHECK,
-        payload: { 
-            ...res.payload,
-            updateTimestamp: +(new Date())
-        }
-    }
+export function wsItemCheckAction({req, res}) {
+    if (res.success)
+        return {
+            type: WS_ITEM_CHECK,
+            payload: { 
+                ...res.payload,
+                updateTimestamp: +(new Date())
+            }
+        };
+    else
+        return {
+            type: ITEM_UPDATE_ERROR,
+            payload: {
+                status: 'error',
+                id: req.payload.id,
+                updateTimestamp: +(new Date())
+            }
+        };
 }

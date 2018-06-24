@@ -55,7 +55,9 @@ export function* restAPICall({methodName, requestPayload = {},
                     res: { code: 'NETWORK_ERROR', message: e.toString() },
                     ...actionPayload
                 };
-                yield put(errorAction(payload));
+                const res = errorAction(payload);
+                if (res && res.type)
+                    yield put(res);
             } else if (e instanceof Error) {
                 // REST API server error
                 const payload = {
@@ -66,7 +68,9 @@ export function* restAPICall({methodName, requestPayload = {},
                     res: (e.response) ? e.response.body : {},
                     ...actionPayload
                 };
-                yield put(errorAction(payload));
+                const res = errorAction(payload);
+                if (res && res.type)
+                    yield put(res);
             }
         }
         if (throwError)
@@ -109,7 +113,9 @@ export function* restAPICallCancellable({methodName, requestPayload = {},
                     res: { code: 'NETWORK_ERROR', message: e.toString() },
                     ...actionPayload
                 };
-                yield put(errorAction(payload));
+                const res = errorAction(payload);
+                if (res && res.type)
+                    yield put(res);
             } else if (e instanceof Error) {
                 // REST API server error
                 const payload = {
@@ -120,7 +126,9 @@ export function* restAPICallCancellable({methodName, requestPayload = {},
                     res: (e.response) ? e.response.body : {},
                     ...actionPayload
                 };
-                yield put(errorAction(payload));
+                const res = errorAction(payload);
+                if (res && res.type)
+                    yield put(res);
             }
         }
         if (throwError)
