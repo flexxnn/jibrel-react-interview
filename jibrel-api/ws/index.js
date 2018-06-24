@@ -2,7 +2,7 @@
 const fs            = require('fs');
 const path          = require('path');
 const basename      = path.basename(module.filename);
-const log           = require('debug')('ws:log'),
+const log           = require('debug')('ws:log');
 const error         = require('debug')('ws:error');
 
 class Messaging {
@@ -77,7 +77,7 @@ class Messaging {
         // check for message format
         if (msg.message.indexOf('.') === -1) {
             error('invalid message format: '+message);
-            sock.send(cb, {success: 0, error: 'INVALID_MSG_FORMAT'});
+            sock.send(cb, {success: false, error: 'INVALID_MSG_FORMAT'});
             return;
         }
 
@@ -87,13 +87,13 @@ class Messaging {
 		      module = this._modules[moduleName];
 
         if (!module) {
-            sock.send(cb, {success: 0, error: 'INVALID_MODULE'});
+            sock.send(cb, {success: false, error: 'INVALID_MODULE'});
             return;
         }
 
         // we can't call _checkAccess directly from UI
         if (methodName == '_checkAccess' || !module[methodName]) {
-            sock.send(cb, {success: 0, error: 'INVALID_METHOD'});
+            sock.send(cb, {success: false, error: 'INVALID_METHOD'});
             return;
         }
 
@@ -102,7 +102,7 @@ class Messaging {
         if (checkAccess) {
             if (! (checkAccess)(sock, msg) )
             {
-                sock.send(cb, {success: 0, error: 'ACCESS_DENIED'});
+                sock.send(cb, {success: false, error: 'ACCESS_DENIED'});
                 return;
             }
         }

@@ -16,7 +16,7 @@ var mod = {
 
     ping: function(sock, msg) {
         var data = _.defaults(msg.payload, {message: 'message was not set'});
-        sock.send(msg.cb, {success: 1, message: data.message});
+        sock.send(msg.cb, {success: true, message: data.message});
     }
 };
 
