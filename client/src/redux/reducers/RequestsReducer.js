@@ -4,6 +4,8 @@ const {
     REST_ITEM_POST_START,
     REST_ITEM_POST_ERROR,
     REST_ITEM_POST_SUCCESS,
+    WS_ITEM_POST_SUCCESS,
+    WS_ITEM_CHECK,
     ITEM_UPDATE,
     ITEM_UPDATE_ERROR
 } = actions;
@@ -28,6 +30,7 @@ export function requests(state = {
                 restRequestCount: state.restRequestCount + 1                
             };
         
+        case WS_ITEM_POST_SUCCESS:
         case REST_ITEM_POST_SUCCESS:
             return {
                 ...state,
@@ -38,6 +41,7 @@ export function requests(state = {
                 restRequestCount: state.restRequestCount + 1
             };
         
+        case WS_ITEM_CHECK:
         case ITEM_UPDATE: {
             // find the item
             const itemIndex = state.items.findIndex((item) => item.id === action.payload.id);

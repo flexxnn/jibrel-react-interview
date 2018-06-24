@@ -65,7 +65,7 @@ class Messaging {
                 this._onMessage(sock, msg);
             }
         });
-        
+
         sock.on('close', (reasonCode, description) => {
             // notify all modules, that connection is closed
             Object.keys(this._modules).map(m => m.connClose && m.connClose(sock));
@@ -85,6 +85,7 @@ class Messaging {
                 const mod = require(path.join(__dirname, file));
                 if (!mod.disabled && mod.modName) {
                     this._modules[mod.modName] = mod;
+                    mod.messaging = this;
                     log(`Loaded module ${mod.modName} ${file}`);
                 }
             });
@@ -99,7 +100,7 @@ class Messaging {
         // check for message format
         if (msg.message.indexOf('.') === -1) {
             error('invalid message format: '+message);
-            sock.send(cb, {success: false, error: 'INVALID_MSG_FORMAT'});
+            sock.send(cb, {success: false, code: 'INVALID_MSG_FORMAT'});
             return;
         }
 
@@ -109,13 +110,17 @@ class Messaging {
 		      module = this._modules[moduleName];
 
         if (!module) {
-            sock.send(cb, {success: false, error: 'INVALID_MODULE'});
+            sock.send(cb, {success: false, code: 'INVALID_MODULE'});
             return;
         }
 
         // we can't call _checkAccess directly from UI
-        if (methodName == 'checkAccess' || methodName == 'connClose' || !module[methodName]) {
-            sock.send(cb, {success: false, error: 'INVALID_METHOD'});
+        if (methodName.substr(0, 1) === '_' ||
+            methodName === 'modName' ||
+            methodName === 'disabled' ||
+            methodName === 'messaging' || 
+            !module[methodName]) {
+            sock.send(cb, {success: false, code: 'INVALID_METHOD'});
             return;
         }
 
@@ -124,7 +129,7 @@ class Messaging {
         if (checkAccess) {
             if (! (checkAccess)(sock, msg) )
             {
-                sock.send(cb, {success: false, error: 'ACCESS_DENIED'});
+                sock.send(cb, {success: false, code: 'ACCESS_DENIED'});
                 return;
             }
         }

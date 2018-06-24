@@ -24,3 +24,7 @@ RestClient:
 WebsocketClient:
   url: 'ws://localhost:10010/'
   reconnectTimeout: 1000
+  
+  checkerConf:
+    itemUpdateThrottle: 5000
+

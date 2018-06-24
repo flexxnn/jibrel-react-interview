@@ -1,12 +1,16 @@
 const uuid = require('node-uuid');
+const EventEmitter = require('events');
 
-class ItemQueue {
-    constructor() {
+class ItemQueue extends EventEmitter {
+    constructor(name = '') {
+        super();
+
         this._items = {};
         this._queue = [];
+        this._name = name;
     }
 
-    createItem(payload) {
+    createItem(payload, sessionId = null) {
         return new Promise( (accept) => {
             const item = {
                 id: uuid.v4(),
@@ -16,8 +20,13 @@ class ItemQueue {
                 updatedAt: new Date(0)
             };
 
+            if (sessionId)
+                item['sessionId'] = sessionId;
+
             this._items[item.id] = item;
             this._queue.push(item.id);
+
+            this.emit('ItemAdded', item);
             accept(item);
         });
     }
@@ -60,6 +69,8 @@ class ItemQueue {
                 status
             };
 
+            this.emit('ItemUpdated', this._items[id]);
+
             accept();
         });
     }
@@ -70,6 +81,10 @@ class ItemQueue {
 
     get queueLength() {
         return this._queue.length;
+    }
+
+    get name() {
+        return this._name;
     }
 }
 
