@@ -2,7 +2,7 @@ import { all, put, call, select, race, actionChannel,
     getContext, setContext, cancelled, 
     fork, take, cancel } from 'redux-saga/effects'        
 import { delay, eventChannel } from 'redux-saga';
-import { uuid } from 'uuid/v4';
+import uuid from 'uuid/v4';
 
 import { logger } from '../../utils';
 import actions from '../actions';
@@ -20,6 +20,13 @@ const STATUS_UPDATED = 'STATUS_UPDATED';
 
 const [ log, error ] = logger('WSSaga');
 
+function pingAction({message, req, res}){
+    console.log(req, res, message);
+    return {
+        type: 'ACTION_PING'
+    }
+}
+
 function watchMessages(socket) {
     return eventChannel((emit) => {
         socket.onopen = () => {
@@ -27,9 +34,13 @@ function watchMessages(socket) {
             emit({ open: true });
         };
         socket.onmessage = (msg) => {
-            log('on message '+msg);
-            const message = JSON.parse(msg);
-            emit({ message });
+            log('on message '+msg.data);
+            try {                
+                const data = JSON.parse(msg.data);
+                emit({ data });
+            } catch (e) {
+                error(`can't parse JSON ${msg.data}`);
+            }
         };
         socket.onerror = (err) => {
             log('socket error', err);
@@ -45,7 +56,7 @@ function watchMessages(socket) {
     });
 }
 
-function* internalListener({ socket, sendChannel }) {
+function* sendListener({ socket, sendChannel }) {
     try {
         while (true) {
             const { payload } = yield take(sendChannel);
@@ -59,27 +70,28 @@ function* internalListener({ socket, sendChannel }) {
     }
 }
 
-function* send({ messageName, payload, sessionBuffer,
+function* send({ message, payload, sessionBuffer,
         actionToCall = null, actionPayload = {}}) {
     const msg = {
-        cb: uuid(),
-        name: messageName,
+        message,
         payload
     };
-    
-    sessionBuffer[msg.cb] = { msg, 
-        actionToCall, 
-        actionPayload 
-    };
-
+    if (actionToCall) {
+        msg['cb'] = `${message}:RESPONSE:${uuid()}`;
+        sessionBuffer[msg.cb] = { msg, 
+            actionToCall, 
+            actionPayload 
+        };
+    }
+    log('send', msg);
     yield put({ type: SOCKET_SEND, payload: msg });
 }
 
-function* externalListener({ socket, recvChannel, sessionBuffer }) {
+function* recvListener({ recvChannel, sessionBuffer }) {
     try {
         while (true) {
             const msg = yield take(recvChannel);
-            log('externalListener', msg);
+            log('recvListener', msg);
 
             // catch connection error and exit from externalListener
             // it will cancel internalListener too (see race doc)
@@ -87,12 +99,17 @@ function* externalListener({ socket, recvChannel, sessionBuffer }) {
                 return;
 
             if (msg.open) {
-
+                yield send({
+                    sessionBuffer,
+                    message: 'echo.ping',
+                    payload: { a: 1 },
+                    actionToCall: pingAction
+                });
             }
 
-            if (msg.message) {
-                const message = msg.message;
-                switch(message) {
+            if (msg.data) {
+                const messageName = msg.data.message;
+                switch(messageName) {
                     case 'ADDED_TO_QUEUE': {
                         break;
                     }
@@ -102,15 +119,14 @@ function* externalListener({ socket, recvChannel, sessionBuffer }) {
                     }
 
                     default:
-                        if (sessionBuffer[message]) {
-                            if (sessionBuffer[message].actionToCall) {
-                                yield put(sessionBuffer[message].actionToCall({ 
-                                    res: msg.payload,
-                                    req: sessionBuffer[message].msg,
-                                    messageName: sessionBuffer[message].name
-                                }));
-                            }
-                            delete sessionBuffer[message];
+                        if (sessionBuffer[messageName]) {
+                            yield put(sessionBuffer[messageName].actionToCall({ 
+                                res: msg.data.payload,
+                                req: sessionBuffer[messageName].msg,
+                                message: sessionBuffer[messageName].msg.message,
+                                ...sessionBuffer[messageName].actionPayload
+                            }));
+                            delete sessionBuffer[messageName];
                         }
                         break;
                 }
@@ -118,26 +134,26 @@ function* externalListener({ socket, recvChannel, sessionBuffer }) {
         }
     } finally {
         if (yield cancelled())
-            log('cancelled externalListener');
+            log('cancelled recvListener');
     }
 }
 
 function* socketTask() {
-    let socket, recvChannel, sendChannel;
-    let sessionBuffer = {};
+    let socket, recvChannel, sendChannel, sessionBuffer;    
     try {
         while (true) {
+            sessionBuffer = {};
             socket = new WebSocket(config.WebsocketClient.url, 'echo-protocol');
-            log(socket);
             recvChannel = yield call(watchMessages, socket);
             sendChannel = yield actionChannel(SOCKET_SEND);
             
             yield race([
-                call(externalListener, { socket, recvChannel, sendChannel, sessionBuffer }), 
-                call(internalListener, { socket, recvChannel, sendChannel, sessionBuffer })
+                call(recvListener, { socket, recvChannel, sendChannel, sessionBuffer }), 
+                call(sendListener, { socket, recvChannel, sendChannel, sessionBuffer })
             ]);
 
             recvChannel.close();
+            sendChannel.close();
 
             // reconnect timeout
             yield delay(config.WebsocketClient.reconnectTimeout);
@@ -146,13 +162,15 @@ function* socketTask() {
         if (yield cancelled()) {
             socket.close(4000, APPLICATION_DIS);
             recvChannel.close();
+            sendChannel.close();
             log('cancelled socketTask');
         }
-        sessionBuffer = null;
     }
 }
 
 export default function* wsSaga() {
+    yield setContext({ sessionName: uuid() });
+
     while (true) {
         yield take(APPLICATION_EN);
         try {
