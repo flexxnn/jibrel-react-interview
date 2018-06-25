@@ -5,7 +5,9 @@ import { connect } from 'react-redux';
 
 import { List, AutoSizer } from 'react-virtualized';
 
-import './RequestList.scss';
+import ItemListRow from './ItemListRow';
+
+import './ItemList.scss';
 
 const rowRenderer = (items, rowClick) => ({
         index,       // Index of row
@@ -15,16 +17,19 @@ const rowRenderer = (items, rowClick) => ({
         // parent,      // Reference to the parent List (instance)
         style,        // Style object to be applied to row (to position it);        
     }) => ( 
-        <div className={`row ${(index%2)?'odd':'even'} ${(rowClick)?'clickable':''}`} 
-                key={key} style={style} onClick={rowClick && rowClick(items[index].id)}>
-            <div className="request-id">#{items[index].id}</div>
-            <div className="request-payload">{JSON.stringify(items[index].requestPayload).substr(0, 250)}</div>
-            <div className="request-status">{items[index].status}</div>
-        </div>
+        <ItemListRow 
+            key={key}
+            style={style}
+            odd={(index%2 === 0)}
+            id={items[index].id}
+            payload={JSON.stringify(items[index].requestPayload).substr(0, 150)}
+            protocol={items[index].type}
+            status={items[index].status}
+        />
     );
 
 const RequestList = ({items, itemCount, onClick}) => (
-    <div className="request-list">
+    <div className="item-list">
         <AutoSizer>
             {({width, height}) => (
                 <List rowRenderer={rowRenderer(items)} 

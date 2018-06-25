@@ -61,7 +61,7 @@ function* sendListener({ socket, sendChannel }) {
     try {
         while (true) {
             const { payload } = yield take(sendChannel);
-            log('send: ', payload);
+            log('sendListener:', payload);
             if (socket.readyState === 1) // The connection is open and ready to communicate
                 socket.send(JSON.stringify(payload));
         }
@@ -132,13 +132,16 @@ export function* socketSend({ message, payload = {},
     callbackAction = null, actionPayload = {}}) 
 {
     const sessionBuffer = yield getContext('sessionBuffer');
-    if (!sessionBuffer)
+    const sendChannel = yield getContext('sendChannel');
+
+    if (!sessionBuffer || !sendChannel)
         throw new Error('You should call "send" from task, forked from connEstablishedTask');
 
     const msg = {
         message,
         payload
     };
+
     if (callbackAction) {
         msg['cb'] = `${message}:RESPONSE:${uuid()}`;
         sessionBuffer[msg.cb] = { msg, 
@@ -146,8 +149,9 @@ export function* socketSend({ message, payload = {},
             actionPayload 
         };
     }
-    log('send', msg);
-    yield put({ type: WS_SOCKET_SEND, payload: msg });
+
+    log('socketSend', msg);
+    yield put(sendChannel, { type: WS_SOCKET_SEND, payload: msg });
     
     return msg['cb'];
 }
@@ -156,31 +160,48 @@ export function* socketTask({url, reconnectTimeout = 1000, connEstablishedTaskFn
     let socket, recvChannel, sendChannel, sessionBuffer;
     try {
         while (true) {
-            sessionBuffer = {};            
-            socket = new WebSocket(url, 'echo-protocol');
-            recvChannel = yield call(watchMessages, socket);
-            sendChannel = yield actionChannel(WS_SOCKET_SEND);
-            
-            yield setContext({ sessionBuffer });
+            try {
+                sessionBuffer = {};            
+                socket = new WebSocket(url, 'echo-protocol');
+                // create event channel to pass events from WS to saga
+                recvChannel = yield call(watchMessages, socket);
+                // sendChannel = yield actionChannel(WS_SOCKET_SEND);
+                // It is better, to use 'channel' here, because actionChannel will flood to redux
+                sendChannel = yield channel(buffers.dropping(10));
+                
+                // Pass sessionBuffer and sendChannel to the 'socketSend' function
+                // Context only available in the socketTask and child tasks, if it cancelled -> context lost
+                yield setContext({ sessionBuffer, sendChannel });
 
-            yield race([
-                call(recvListener, { socket, recvChannel, sendChannel, sessionBuffer, connEstablishedTaskFn }), 
-                call(sendListener, { socket, recvChannel, sendChannel, sessionBuffer })
-            ]);
+                yield race([
+                    call(recvListener, { socket, recvChannel, sendChannel, sessionBuffer, connEstablishedTaskFn }), 
+                    call(sendListener, { socket, recvChannel, sendChannel, sessionBuffer })
+                ]);
+            } catch (e) {
+                // catch exception here and reconnect 
+                console.error(e);
+            }
 
-            recvChannel.close();
-            sendChannel.close();
-            socket.close(3999);
+            // clean resourses
+            if (socket)
+                socket.close(4001);
+            if (recvChannel)
+                recvChannel.close();
+            if (sendChannel)
+                sendChannel.close();
 
             // reconnect timeout
             yield delay(reconnectTimeout);
         }
     } finally {
         if (yield cancelled()) {
-            socket.close(4000);
-            recvChannel.close();
-            sendChannel.close();
-            // messageChannel.close();
+            if (socket)
+                socket.close(4000);
+            if (recvChannel)
+                recvChannel.close();
+            if (sendChannel)
+                sendChannel.close();
+
             log('cancelled socketTask');
         }
     }

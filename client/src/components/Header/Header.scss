@@ -1,0 +1,22 @@
+@import '../../styles/colors.scss';
+@import '../../styles/params.scss';
+
+header {
+    height: 70px;
+    padding: 21px 20px;
+    border-bottom: 1px solid $line;
+    line-height: 21px;
+
+    h1 {
+        display: inline-block;
+        font-size: 25px;
+        line-height: 21px;
+    }
+    .switch-control {
+        float: right;
+    }
+    & > .wrapper {
+        max-width: $ui-width;
+        margin: 0 auto 0;
+    }
+}

@@ -103,27 +103,27 @@ export function* restAPICallCancellable({methodName, requestPayload = {},
         yield payload;
     } catch (e) {
         if (errorAction) {
-            if (e instanceof TypeError) {
+            if (e.message === 'Network Error') {
                 // network error, failed to fetch
                 const payload = {
                     methodName,
                     success: false,
                     status: 0,
                     req: requestPayload,
-                    res: { code: 'NETWORK_ERROR', message: e.toString() },
+                    res: { code: 'NETWORK_ERROR', message: e.message },
                     ...actionPayload
                 };
                 const res = errorAction(payload);
                 if (res && res.type)
                     yield put(res);
-            } else if (e instanceof Error) {
+            } else {
                 // REST API server error
                 const payload = {
                     methodName,
                     success: false,
                     status: e.status,
                     req: requestPayload,
-                    res: (e.response) ? e.response.body : {},
+                    res: (e.result) ? e.result.data : {},
                     ...actionPayload
                 };
                 const res = errorAction(payload);

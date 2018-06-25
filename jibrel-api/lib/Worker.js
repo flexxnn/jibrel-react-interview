@@ -18,8 +18,8 @@ class Worker {
     }
 
     async _processItem(item) {
-        console.log("_processItem ", item.id);
-        const ms = Math.floor(Math.random(10)*1000) + 1;        
+        console.log("_processItem ("+this._itemQueue.name+")", item.id);
+        const ms = Math.floor(Math.random()*10000) + 1;
         await timeout(ms);
         return {
             ...item,
