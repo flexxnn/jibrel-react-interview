@@ -30,10 +30,11 @@ const {
     pusherConf
 } = config.RestClient;
 
-const MAX_CHECK_PARALLEL = (checkerConf.parallelTasksCount > 0) ? checkerConf.parallelTasksCount : 1;
-const CHECKER_TIMEOUT = checkerConf.timeoutBetweenRequests;
-const PUSHER_TIMEOUT = pusherConf.timeoutBetweenRequests;
-const CHECKER_THROTTLE = checkerConf.itemUpdateThrottle;
+const MAX_CHECK_PARALLEL = (Number(checkerConf.parallelTasksCount) > 0) ? Number(checkerConf.parallelTasksCount) : 1;
+const CHECKER_TIMEOUT = Number(checkerConf.timeoutBetweenRequests);
+const PUSHER_TIMEOUT = Number(pusherConf.timeoutBetweenRequests);
+const CHECKER_THROTTLE = Number(checkerConf.itemUpdateThrottle);
+const MAX_ITEMS_PER_CHECK = Number(checkerConf.maxItemsPerCheck);
 
 function getItemData() {
     let s = '';
@@ -135,14 +136,17 @@ function* checkRequestStatusTask() {
 
             // get all pending items from queue
             const allItems = yield select(state => state.requests.items);
-            const pendingItems = allItems.filter(requestFilter);
-            
+            let pendingItems = allItems.filter(requestFilter);
+
             // if we don't have items to check
             if (pendingItems.length === 0) {
                 yield delay(1);
                 continue;
             }
-            
+
+            if (MAX_ITEMS_PER_CHECK && pendingItems.length > MAX_ITEMS_PER_CHECK)
+                pendingItems = pendingItems.slice(0, MAX_ITEMS_PER_CHECK);
+        
             // console.log(pendingItems);
             yield all(pendingItems.map(item => put(chan, item.id)));
             // console.log('all in CH ');

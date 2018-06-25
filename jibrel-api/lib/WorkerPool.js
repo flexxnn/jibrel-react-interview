@@ -2,7 +2,7 @@
 const Worker = require('./Worker');
 
 class WorkerPool {
-    constructor(itemQueue, numWorkers = 2) {
+    constructor(itemQueue, numWorkers = 50) {
         this._workers = [];
         for (let i = 0; i < numWorkers; i++)
             this._workers.push(new Worker(itemQueue));

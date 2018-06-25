@@ -44,7 +44,11 @@ class Worker {
             }
 
             try {
+                // set working status
+                await this._itemQueue.updateItem(item.id, {}, 'working');
+                // process
                 const result = await this._processItem(item);
+                // put it back
                 await this._itemQueue.updateItem(item.id, result);
             } catch (e) {
                 console.error('Worker error', e);

@@ -14,6 +14,8 @@ RestClient:
     timeoutBetweenRequests: 0
     # prohibit refreshing a item more than once per second
     itemUpdateThrottle: 1000
+    # get first 100 items with pending status, and check only them, 0 - disabled
+    maxItemsPerCheck: 100
   
   # request pusher configuration
   pusherConf:

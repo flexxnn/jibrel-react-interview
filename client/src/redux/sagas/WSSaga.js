@@ -1,4 +1,4 @@
-import { put, select,getContext, setContext, cancelled, fork, take } from 'redux-saga/effects'
+import { put, select,getContext, setContext, cancelled, fork, take, race, call } from 'redux-saga/effects'
 import { delay } from 'redux-saga';
 import uuid from 'uuid/v4';
 
@@ -9,7 +9,7 @@ import config from '../../config.yaml';
 import API from './api';
 const { socketSend, socketTask } = API;
 
-const CHECKER_THROTTLE = config.WebsocketClient.checkerConf.itemUpdateThrottle;
+const CHECKER_THROTTLE = Number(config.WebsocketClient.checkerConf.itemUpdateThrottle);
 
 const {
     APPLICATION_EN,
@@ -17,6 +17,7 @@ const {
     WS_ITEM_POST_SUCCESS,
     WS_ITEM_POST_ERROR,
     WS_ITEM_CHECK,
+    WS_ITEM_CHECK_ERROR,
     wsItemPostAction,
     wsItemUpdateAction,
     wsItemCheckAction
@@ -70,7 +71,12 @@ function* itemCheckTask() {
                     },
                     callbackAction: wsItemCheckAction
                 });
-                yield take(WS_ITEM_CHECK);
+                // wait for callback execute
+                // @todo: add timer here
+                yield race([
+                    take([WS_ITEM_CHECK, WS_ITEM_CHECK_ERROR]),
+                    delay(5000)
+                ]);
 
                 // to prevent slide-show in browser
                 yield delay(1); 
@@ -94,7 +100,11 @@ function* itemPostTask() {
                 },
                 callbackAction: wsItemPostAction
             });
-            yield take([WS_ITEM_POST_SUCCESS, WS_ITEM_POST_ERROR]);
+
+            yield race([
+                take([WS_ITEM_POST_SUCCESS, WS_ITEM_POST_ERROR]),
+                delay(5000)
+            ]);
 
             // to prevent slide-show in browser
             yield delay(1);
@@ -136,7 +146,7 @@ export default function* wsSaga() {
         try {
             const task = yield fork(socketTask, {
                 url: config.WebsocketClient.url,
-                reconnectTimeout: config.WebsocketClient.reconnectTimeout,
+                reconnectTimeout: Number(config.WebsocketClient.reconnectTimeout),
                 connEstablishedTaskFn: connEstablishedTask
             });
             

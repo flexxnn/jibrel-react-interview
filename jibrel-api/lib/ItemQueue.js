@@ -50,8 +50,8 @@ class ItemQueue extends EventEmitter {
             if (!this._items[id])
                 return reject();
 
-            this._items[id].updatedAt = new Date();
-            this._items[id].status = 'working';
+            // this._items[id].updatedAt = new Date();
+            // this._items[id].status = 'working';
 
             accept(this._items[id]);
         });

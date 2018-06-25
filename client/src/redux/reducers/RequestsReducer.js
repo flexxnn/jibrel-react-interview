@@ -5,9 +5,12 @@ const {
     REST_ITEM_POST_ERROR,
     REST_ITEM_POST_SUCCESS,
     WS_ITEM_POST_SUCCESS,
+    
     WS_ITEM_CHECK,
-    ITEM_UPDATE,
-    ITEM_UPDATE_ERROR
+    WS_ITEM_UPDATE,
+    REST_ITEM_UPDATE,
+    REST_ITEM_UPDATE_ERROR,
+    WS_ITEM_CHECK_ERROR
 } = actions;
 
 // const items100k = [];
@@ -22,13 +25,11 @@ export function requests(state = {
     restRequestCount: 0
 }, action) {
     switch (action.type) {
-        case REST_ITEM_POST_ERROR:
-            return {
-                ...state,
-                items: [...state.items],
-                restErrorCount: state.restErrorCount + 1,
-                restRequestCount: state.restRequestCount + 1                
-            };
+        // case REST_ITEM_POST_ERROR:
+        //     return {
+        //         ...state,
+        //         items: [...state.items]     
+        //     };
         
         case WS_ITEM_POST_SUCCESS:
         case REST_ITEM_POST_SUCCESS:
@@ -37,12 +38,12 @@ export function requests(state = {
                 items: [
                     ...state.items,
                     { ...action.payload },
-                ],
-                restRequestCount: state.restRequestCount + 1
+                ]
             };
         
         case WS_ITEM_CHECK:
-        case ITEM_UPDATE: {
+        case WS_ITEM_UPDATE:
+        case REST_ITEM_UPDATE: {
             // find the item
             const itemIndex = state.items.findIndex((item) => item.id === action.payload.id);
             return {
@@ -54,7 +55,8 @@ export function requests(state = {
             };
         }
 
-        case ITEM_UPDATE_ERROR: {
+        case WS_ITEM_CHECK_ERROR:
+        case REST_ITEM_UPDATE_ERROR: {
             // find the item
             const itemIndex = state.items.findIndex((item) => item.id === action.payload.id);
             return {
