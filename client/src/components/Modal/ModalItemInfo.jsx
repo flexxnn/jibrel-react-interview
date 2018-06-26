@@ -43,7 +43,6 @@ class ModalItemInfo extends React.Component {
 
 const mapStateToProps = (state) => {
     const modal = selectModal(state);
-    console.log(modal);
     const item = selectItem(state, modal.itemId) || { notFound: true };
     return {
         ...item

@@ -41,7 +41,7 @@ function getItemData() {
     let s = '';
     for (let i = 0; i < 20000; i++)
         s = s + i;
-    console.log(s.length);
+    // console.log(s.length);
     return { abc: Math.random()*1000, s };
 }
 

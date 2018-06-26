@@ -70,7 +70,6 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
     onRowClick: (id) => {
-        console.log('onRowClick', id);
         dispatch(modalOpenItemInfo(id))
     }
 });
