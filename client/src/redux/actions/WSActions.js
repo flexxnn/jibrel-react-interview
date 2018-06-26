@@ -19,7 +19,7 @@ export function wsItemPostAction({req, res}) {
         return {
             type: WS_ITEM_POST_SUCCESS,
             payload: {
-                type: 'WS',                
+                type: 'WS',
                 ...req.payload,
                 ...res.payload,
                 updateTimestamp: +(new Date())

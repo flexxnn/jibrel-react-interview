@@ -87,7 +87,7 @@ export function* restAPICallCancellable({methodName, requestPayload = {},
             operationId: methodName,
             parameters: requestPayload
         });
-        
+
         const result = yield call(fetchAPI, req);
         const payload = {
             methodName,
@@ -98,9 +98,9 @@ export function* restAPICallCancellable({methodName, requestPayload = {},
             ...actionPayload
         };
         if (successAction) {
+            console.log(payload, successAction);
             yield put(successAction(payload));
         }
-        yield payload;
     } catch (e) {
         if (errorAction) {
             if (e.message === 'Network Error') {

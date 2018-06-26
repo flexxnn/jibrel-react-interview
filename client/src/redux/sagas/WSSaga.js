@@ -8,8 +8,8 @@ import config from '../../config.yaml';
 
 import { selectItemsArray } from '../StateSelectors';
 
-import API from './api';
-const { socketSend, socketTask } = API;
+import LIB from './lib';
+const { socketSend, socketTask } = LIB;
 
 const CHECKER_THROTTLE = Number(config.WebsocketClient.checkerConf.itemUpdateThrottle);
 

@@ -8,8 +8,8 @@ import { selectItemsArray } from '../StateSelectors';
 import actions from '../actions';
 import config from '../../config.yaml';
 
-import API from './api';
-const { /* restAPICall, */ restAPICallCancellable, restAPIInit } = API;
+import LIB from './lib';
+const { /* restAPICall, */ restAPICallCancellable, restAPIInit } = LIB;
 
 const [ log, error ] = logger('requestSaga');
 

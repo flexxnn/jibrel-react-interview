@@ -38,6 +38,7 @@ const ItemList = ({items, itemCount, onRowClick}) => (
         <AutoSizer>
             {({width, height}) => (
                 <List rowRenderer={rowRenderer(items, onRowClick)} 
+                    overscanRowCount={20}
                     rowCount={itemCount}
                     rowHeight={50}
                     height={height}
