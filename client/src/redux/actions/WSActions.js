@@ -1,3 +1,5 @@
+export const WS_CONNECTION_ESTABLISHED = 'WS_CONNECTION_ESTABLISHED';
+export const WS_DISCONNECTED = 'WS_DISCONNECTED';
 
 export const WS_PENDING_MESSAGE = 'WS_PENDING_MESSAGE';
 export const WS_ITEM_POST_SUCCESS = 'WS_ITEM_POST_SUCCESS';
@@ -7,12 +9,17 @@ export const WS_ITEM_CHECK = 'WS_ITEM_CHECK';
 export const WS_ITEM_UPDATE = 'WS_ITEM_UPDATE';
 export const WS_ITEM_CHECK_ERROR = 'WS_ITEM_CHECK_ERROR';
 
-export default function(msg) {
-    return {
-        type: WS_PENDING_MESSAGE,
-        payload: msg
+export function wsConnEstablishedAction() { 
+    return { 
+        type: WS_CONNECTION_ESTABLISHED 
     };
 };
+
+export function wsDisconnetedAction() {
+    return { 
+        type: WS_DISCONNECTED 
+    };
+}
 
 export function wsItemPostAction({req, res}) {
     if (res.success)

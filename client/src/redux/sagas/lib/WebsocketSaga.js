@@ -6,19 +6,16 @@ import uuid from 'uuid/v4';
 
 import { logger } from '../../../utils';
 
+import actions from '../../actions';
+
+const { 
+    wsDisconnetedAction, 
+    wsConnEstablishedAction 
+} = actions;
+
 const WS_SOCKET_SEND = 'WS_SOCKET_SEND';
-export const WS_CONNECTION_ESTABLISHED = 'WS_CONNECTION_ESTABLISHED';
-export const WS_DISCONNECTED = 'WS_DISCONNECTED';
 
 const [ log, error ] = logger('WebsocketSaga');
-
-const connEstablishedAction = () => { 
-    return { type: WS_CONNECTION_ESTABLISHED };
-};
-
-const disconnetedAction = () => {
-    return { type: WS_DISCONNECTED }
-}
 
 // helper action for socketSendSync
 // const socketWaitSyncAction = ({ req, res }) => {
@@ -79,17 +76,17 @@ function* recvListener({ recvChannel, sessionBuffer, connEstablishedTaskFn }) {
             const msg = yield take(recvChannel);
             log('recvListener', msg);
 
-            // catch connection error and exit from externalListener
-            // it will cancel internalListener too (see race doc)
+            // catch connection error and exit from recvListener
+            // it will cancel sendListener too (see race doc)
             if (msg.error || msg.close) {
                 if (connEstablishedTask)
                     yield cancel(connEstablishedTask);
-                yield put(disconnetedAction());
+                yield put(wsDisconnetedAction());
                 return;
             }
 
             if (msg.open) {
-                yield put(connEstablishedAction());
+                yield put(wsConnEstablishedAction());
                 if (connEstablishedTaskFn)
                     connEstablishedTask = yield fork(connEstablishedTaskFn, messageChannel);
             }
@@ -135,7 +132,7 @@ export function* socketSend({ message, payload = {},
     const sendChannel = yield getContext('sendChannel');
 
     if (!sessionBuffer || !sendChannel)
-        throw new Error('You should call "send" from task, forked from connEstablishedTask');
+        throw new Error('You should call "socketSend" from task, forked from connEstablishedTask');
 
     const msg = {
         message,
@@ -150,7 +147,6 @@ export function* socketSend({ message, payload = {},
         };
     }
 
-    log('socketSend', msg);
     yield put(sendChannel, { type: WS_SOCKET_SEND, payload: msg });
     
     return msg['cb'];
@@ -178,7 +174,7 @@ export function* socketTask({url, reconnectTimeout = 1000, connEstablishedTaskFn
                     call(sendListener, { socket, recvChannel, sendChannel, sessionBuffer })
                 ]);
             } catch (e) {
-                // catch exception here and reconnect 
+                // catch unhandled exception here and reconnect 
                 console.error(e);
             }
 
