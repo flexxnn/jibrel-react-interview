@@ -4,14 +4,17 @@ const {
     APPLICATION_EN,
     APPLICATION_DIS,
     APPLICATION_FATAL_ERROR,
-    APPLICATION_STARTED
+    APPLICATION_STARTED,
+    WS_CONNECTION_ESTABLISHED,
+    WS_DISCONNECTED
 } = actions;
 
 // eslint-disable-next-line import/prefer-default-export
 export function appState(state = {
     applicationEnabled: false,
     applicationStarted: false,
-    fatalError: ''
+    fatalError: '',
+    wsConnected: false
 }, action) {
     switch (action.type)
     {
@@ -23,6 +26,11 @@ export function appState(state = {
             return { ...state, applicationStarted: true };
         case APPLICATION_FATAL_ERROR:
             return { ...state, fatalError: action.payload.fatalError };
+
+        case WS_CONNECTION_ESTABLISHED:
+            return { ...state, wsConnected: true };
+        case WS_DISCONNECTED:
+            return { ...state, wsConnected: false };
         default:
             return state;
     }
