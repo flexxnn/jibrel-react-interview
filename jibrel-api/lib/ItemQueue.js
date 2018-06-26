@@ -35,8 +35,7 @@ class ItemQueue extends EventEmitter {
                 id: uuid.v4(),
                 status: 'pending',
                 requestPayload: payload,
-                createdAt: new Date(),
-                updatedAt: new Date(0)
+                createdAt: new Date()
             };
 
             if (sessionId)

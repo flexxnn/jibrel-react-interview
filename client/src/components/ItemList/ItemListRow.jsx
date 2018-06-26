@@ -4,12 +4,29 @@ import PropTypes from 'prop-types';
 
 import './ItemListRow.scss';
 
-const ItemListRow = ({ odd, rowClick, protocol, id, status, payload, style }) => (
+const ItemListRowDate = ({ createdAt, updatedAt }) => (
+    <div className="item-date">{
+        (createdAt && !updatedAt && `Created at ${(new Date(createdAt)).toLocaleTimeString('en-US')}`) ||
+        (updatedAt && `Updated at ${(new Date(updatedAt)).toLocaleTimeString('en-US')}`)
+    }</div>
+);
+
+ItemListRowDate.propTypes = {
+    createdAt: PropTypes.string,
+    updatedAt: PropTypes.string
+};
+
+const ItemListRow = ({ odd, rowClick, protocol, id, status, payload, style, createdAt, updatedAt }) => (
     <div style={style} className={`item-list-row ${(odd)?'odd':'even'} ${(rowClick)?'clickable':''}`} onClick={(e) => rowClick && rowClick(id, e)}>
         <div className="wrapper">
             <div className={`item-proto proto-${protocol}`}>{protocol}</div>
-            <div className="item-payload">{payload}</div>
-            <div className="item-id">{id}</div>
+            <div className="line-1">
+                <div className="item-payload">{payload}</div>
+            </div>
+            <div className="line-2">
+                <div className="item-id">{id}</div>
+                <ItemListRowDate createdAt={createdAt} updatedAt={updatedAt} />
+            </div>
             <div className={`item-status item-status-${status}`}>{status}</div>
         </div>
     </div>
@@ -22,7 +39,9 @@ ItemListRow.propTypes = {
     protocol: PropTypes.oneOf(['REST', 'WS']).isRequired,
     style: PropTypes.object.isRequired,
 
-    payload: PropTypes.string,    
+    createdAt: PropTypes.string,
+    updatedAt: PropTypes.string,
+    payload: PropTypes.string,
     rowClick: PropTypes.func
 };
 

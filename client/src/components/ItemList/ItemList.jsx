@@ -28,6 +28,8 @@ const rowRenderer = (items, rowClick) => ({
             payload={JSON.stringify(items[index].requestPayload).substr(0, 150)}
             protocol={items[index].type}
             status={items[index].status}
+            createdAt={items[index].createdAt}
+            updatedAt={items[index].updatedAt}
         />
     );
 

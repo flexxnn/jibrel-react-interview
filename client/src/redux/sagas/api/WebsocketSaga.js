@@ -1,4 +1,4 @@
-import { put, call, race, actionChannel,
+import { put, call, race,
     getContext, setContext, cancelled, 
     fork, take, cancel } from 'redux-saga/effects'        
 import { delay, eventChannel, channel, buffers } from 'redux-saga';
@@ -21,12 +21,12 @@ const disconnetedAction = () => {
 }
 
 // helper action for socketSendSync
-const socketWaitSyncAction = ({ req, res }) => {
-    return {
-        type: req.cb,
-        payload: res
-    };
-}
+// const socketWaitSyncAction = ({ req, res }) => {
+//     return {
+//         type: req.cb,
+//         payload: res
+//     };
+// }
 
 function watchMessages(socket) {
     return eventChannel((emit) => {
@@ -119,14 +119,14 @@ function* recvListener({ recvChannel, sessionBuffer, connEstablishedTaskFn }) {
     }
 }
 
-export function* socketSendSync({ message, payload = {}}) {
-    const cbActionName = yield socketSend({
-        message,
-        payload,
-        socketWaitSyncAction
-    });
-    return yield take(cbActionName);
-}
+// export function* socketSendSync({ message, payload = {}}) {
+//     const cbActionName = yield socketSend({
+//         message,
+//         payload,
+//         socketWaitSyncAction
+//     });
+//     return yield take(cbActionName);
+// }
 
 export function* socketSend({ message, payload = {},
     callbackAction = null, actionPayload = {}}) 
