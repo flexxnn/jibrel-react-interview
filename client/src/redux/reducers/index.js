@@ -10,6 +10,7 @@ import rootSaga from './../sagas';
 
 import * as appState from './AppStateReducer';
 import * as requests from './RequestsReducer';
+import * as modal from './modalReducer';
 
 // eslint-disable-next-line no-underscore-dangle
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -21,6 +22,7 @@ const store = createStore(
     combineReducers({
         ...appState,
         ...requests,
+        ...modal,
         router: routerReducer
     }),
     composeEnhancers(

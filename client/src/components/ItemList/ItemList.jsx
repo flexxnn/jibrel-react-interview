@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-// import { toggleState } from '../../actions/applicationState';
+import actions from '../../redux/actions';
 
 import { List, AutoSizer } from 'react-virtualized';
 
@@ -12,6 +12,10 @@ import { selectItemsArray } from '../../redux/StateSelectors';
 
 import './ItemList.scss';
 
+const { 
+    modalOpenItemInfo 
+} = actions;
+
 const rowRenderer = (items, rowClick) => ({
         index,       // Index of row
         // isScrolling, // The List is currently being scrolled
@@ -21,6 +25,7 @@ const rowRenderer = (items, rowClick) => ({
         style,        // Style object to be applied to row (to position it);        
     }) => ( 
         <ItemListRow 
+            rowClick={rowClick}
             key={key}
             style={style}
             odd={(index%2 === 0)}
@@ -64,6 +69,10 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
+    onRowClick: (id) => {
+        console.log('onRowClick', id);
+        dispatch(modalOpenItemInfo(id))
+    }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ItemList);

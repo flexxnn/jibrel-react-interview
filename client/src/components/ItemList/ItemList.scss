@@ -94,6 +94,10 @@
         &.odd {
             background-color:#E3F2FD;
         }
+        &.clickable:hover {
+            background-color: darken(#E3F2FD, 5%);
+            cursor: pointer;
+        }
     }
 }
 
