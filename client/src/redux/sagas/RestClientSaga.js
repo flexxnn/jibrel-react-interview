@@ -3,6 +3,7 @@ import { all, put, call, select,
         fork, take, cancel } from 'redux-saga/effects'        
 import { delay, channel, buffers } from 'redux-saga';
 import { logger } from '../../utils';
+import { selectItemsArray } from '../StateSelectors';
 
 import actions from '../actions';
 import config from '../../config.yaml';
@@ -135,7 +136,7 @@ function* checkRequestStatusTask() {
             }
 
             // get all pending items from queue
-            const allItems = yield select(state => state.requests.items);
+            const allItems = yield select(selectItemsArray);
             let pendingItems = allItems.filter(requestFilter);
 
             // if we don't have items to check

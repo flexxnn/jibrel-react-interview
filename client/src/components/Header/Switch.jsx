@@ -2,10 +2,12 @@ import { connect } from 'react-redux';
 
 import { appToggleState } from '../../redux/actions/AppStateActions';
 
+import { selectAppState } from '../../redux/StateSelectors';
+
 import SwitchControl from '../base/SwitchControl';
 
 const mapStateToProps = (state) => ({
-        state: state.appState.applicationEnabled
+        state: selectAppState(state).applicationEnabled
 });
 
 const mapDispatchToProps = (dispatch) => ({

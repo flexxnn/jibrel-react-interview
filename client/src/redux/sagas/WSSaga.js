@@ -1,10 +1,12 @@
-import { put, select,getContext, setContext, cancelled, fork, take, race, call } from 'redux-saga/effects'
+import { put, select, getContext, setContext, cancelled, fork, take, race } from 'redux-saga/effects'
 import { delay } from 'redux-saga';
 import uuid from 'uuid/v4';
 
 import { logger } from '../../utils';
 import actions from '../actions';
 import config from '../../config.yaml';
+
+import { selectItemsArray } from '../StateSelectors';
 
 import API from './api';
 const { socketSend, socketTask } = API;
@@ -52,7 +54,7 @@ function* itemCheckTask() {
         const sessionId = yield getContext('sessionId');
         while(true) {
             // get all pending items from queue
-            const allItems = yield select(state => state.requests.items);
+            const allItems = yield select(selectItemsArray);
             const pendingItems = allItems.filter(filter);
             if (pendingItems.length === 0) {
                 // nothing to check

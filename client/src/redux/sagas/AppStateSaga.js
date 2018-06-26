@@ -1,5 +1,7 @@
 import { put, takeEvery, select } from 'redux-saga/effects'
 
+import { selectAppState } from '../StateSelectors';
+
 import actions from '../actions';
 const {
     APPLICATION_TOGGLE_STATE,
@@ -8,7 +10,7 @@ const {
 } = actions;
 
 function* toggleApplicationState() {
-    const state = yield select(state => state.appState);
+    const state = yield select(selectAppState);
     if (state.applicationEnabled)
         yield put(appDisable());
     else

@@ -2,7 +2,7 @@ import actions from '../actions';
 
 const {
     REST_ITEM_POST_START,
-    REST_ITEM_POST_ERROR,
+    // REST_ITEM_POST_ERROR,
     REST_ITEM_POST_SUCCESS,
     WS_ITEM_POST_SUCCESS,
     
@@ -21,8 +21,8 @@ const {
 export function requests(state = {
     // items: [...items100k],
     items: [],
-    restErrorCount: 0,
-    restRequestCount: 0
+    restErrorRequestsCount: 0,
+    restSuccessRequestsCount: 0
 }, action) {
     switch (action.type) {
         // case REST_ITEM_POST_ERROR:

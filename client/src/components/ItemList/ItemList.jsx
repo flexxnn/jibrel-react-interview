@@ -8,6 +8,8 @@ import { List, AutoSizer } from 'react-virtualized';
 import ItemListRow from './ItemListRow';
 import PropTypes from 'prop-types';
 
+import { selectItemsArray } from '../../redux/StateSelectors';
+
 import './ItemList.scss';
 
 const rowRenderer = (items, rowClick) => ({
@@ -51,9 +53,10 @@ ItemList.propTypes = {
 }
 
 const mapStateToProps = (state) => {
+    const items = selectItemsArray(state);
     return {
-        items: state.requests.items,
-        itemCount: state.requests.items.length
+        items,
+        itemCount: items.length
     };
 }
 
