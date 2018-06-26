@@ -12,11 +12,11 @@ header {
         font-size: 25px;
         line-height: 21px;
     }
-    .switch-control {
-        float: right;
-    }
     & > .wrapper {
         max-width: $ui-width;
         margin: 0 auto 0;
+        .switch-control {
+            float: right;
+        }
     }
 }

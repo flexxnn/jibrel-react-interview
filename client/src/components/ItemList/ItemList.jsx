@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { List, AutoSizer } from 'react-virtualized';
 
 import ItemListRow from './ItemListRow';
+import PropTypes from 'prop-types';
 
 import './ItemList.scss';
 
@@ -28,11 +29,11 @@ const rowRenderer = (items, rowClick) => ({
         />
     );
 
-const RequestList = ({items, itemCount, onClick}) => (
+const ItemList = ({items, itemCount, onRowClick}) => (
     <div className="item-list">
         <AutoSizer>
             {({width, height}) => (
-                <List rowRenderer={rowRenderer(items)} 
+                <List rowRenderer={rowRenderer(items, onRowClick)} 
                     rowCount={itemCount}
                     rowHeight={50}
                     height={height}
@@ -42,6 +43,12 @@ const RequestList = ({items, itemCount, onClick}) => (
         </AutoSizer>
     </div>
 );
+
+ItemList.propTypes = {
+    items: PropTypes.array.isRequired,
+    itemCount: PropTypes.number.isRequired,
+    onRowClick: PropTypes.func
+}
 
 const mapStateToProps = (state) => {
     return {
@@ -53,4 +60,4 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => ({
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(RequestList);
+export default connect(mapStateToProps, mapDispatchToProps)(ItemList);
