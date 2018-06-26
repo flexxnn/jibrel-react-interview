@@ -98,7 +98,6 @@ export function* restAPICallCancellable({methodName, requestPayload = {},
             ...actionPayload
         };
         if (successAction) {
-            console.log(payload, successAction);
             yield put(successAction(payload));
         }
     } catch (e) {
