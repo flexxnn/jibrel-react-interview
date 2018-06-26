@@ -1,10 +1,8 @@
+const log           = require('debug')('Worker:log');
+const error         = require('debug')('Worker:error');
 
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function tick() {
-    return new Promise(resolve => setTimeout(resolve, 1));
 }
 
 class Worker {
@@ -18,7 +16,7 @@ class Worker {
     }
 
     async _processItem(item) {
-        console.log("_processItem ("+this._itemQueue.name+")", item.id);
+        log("_processItem (Queue: "+this._itemQueue.name+")", item.id);
         const ms = Math.floor(Math.random()*10000) + 1;
         await timeout(ms);
         return {
@@ -28,9 +26,10 @@ class Worker {
     }
 
     async run() {
-        console.log('Worker run');
+        this._stopPromise = Promise;
+    
+        log(`Worker started (Queue: ${this._itemQueue.name})`);
         this._stop = false;
-        // this._stopPromise = new Promise();
 
         // get next message from itemQueue
         while(!this._stop) {
@@ -39,7 +38,7 @@ class Worker {
                 item = await this._itemQueue.popItem();
             } catch (e) {
                 // queue is empty, or can't get next item
-                await tick();
+                await timeout(5);
                 continue;
             }
 
@@ -51,11 +50,17 @@ class Worker {
                 // put it back
                 await this._itemQueue.updateItem(item.id, result);
             } catch (e) {
-                console.error('Worker error', e);
+                try {
+                    await this._itemQueue.updateItem(item.id, { error: 'PROCESS_ERROR' }, 'error');
+                } catch (e) {}
+
+                error('Worker error', e);
+                await timeout(5);
             }
-            await tick();
         }
-        // this._stopPromise.resolve();
+        
+        log(`Worker stopped (Queue: ${this._itemQueue.name})`);
+        this._stopPromise.resolve();
     }
 
     stop() {

@@ -9,7 +9,6 @@ const workerPool = new WorkerPool(restQueue);
 workerPool.run();
 
 function postItem(req, res) {
-    // console.log(req.swagger);
     const requestPayload = req.swagger.params.body.value.requestPayload;
 
     restQueue.createItem(requestPayload).then(

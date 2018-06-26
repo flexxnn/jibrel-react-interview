@@ -119,7 +119,7 @@ class Messaging {
             methodName === 'modName' ||
             methodName === 'disabled' ||
             methodName === 'messaging' || 
-            !module[methodName]) {
+                !module[methodName]) {
             sock.send(cb, {success: false, code: 'INVALID_METHOD'});
             return;
         }

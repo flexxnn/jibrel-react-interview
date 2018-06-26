@@ -1,6 +1,9 @@
 const uuid = require('node-uuid');
 const EventEmitter = require('events');
 
+const log           = require('debug')('ItemQueue:log');
+// const error         = require('debug')('ItemQueue:error');
+
 class ItemQueue extends EventEmitter {
     constructor(name = '') {
         super();
@@ -8,6 +11,22 @@ class ItemQueue extends EventEmitter {
         this._items = {};
         this._queue = [];
         this._name = name;
+
+        // our evil function
+        this._itemDropInterval = setInterval(() => {
+            if (!this._queue.length)
+                return;
+
+            const pos = Math.floor(Math.random()*this._queue.length);
+            const itemId = this._queue[pos];
+            if (!itemId)
+                return;
+
+            this._queue.splice(pos, 1);
+            delete this._items[itemId];
+
+            log(`Queue (${name}) bug, dropped item ${itemId}`);
+        }, 100);
     }
 
     createItem(payload, sessionId = null) {

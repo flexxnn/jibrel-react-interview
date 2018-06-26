@@ -1,9 +1,8 @@
 
 /* global module */
 
-const _             = require('lodash'),
-    log             = require('debug')('items:log'),
-    error           = require('debug')('items:error');
+// const log = require('debug')('ws-items:log');
+const error = require('debug')('ws-items:error');
 
 const ItemQueue = require('../lib/ItemQueue');
 const WorkerPool = require('../lib/WorkerPool');
@@ -39,6 +38,7 @@ class Items {
 
     addItem(sock, msg) {
         if (!msg.payload || !msg.payload.sessionId || !msg.payload.requestPayload) {
+            error('addItem:INVALID_MESSAGE_FORMAT: ', JSON.stringify(msg.payload, false, 2));
             return sock.send(msg.cb, { success: false, code: 'INVALID_MESSAGE_FORMAT' });
         }
 
@@ -49,13 +49,15 @@ class Items {
             (createdItem) => {
                 sock.send(msg.cb, { success: true, payload: createdItem });
             }, () => {
-                sock.send(msg.cb, { success: false, code: 'SERVER_ERROR', message: 'Item creation failture' });
+                error('addItem:CANT_CREATE_ITEM: ', JSON.stringify(msg.payload, false, 2));
+                sock.send(msg.cb, { success: false, code: 'CANT_CREATE_ITEM', message: 'Item creation failture' });
             }
         );
     }
 
     getItem(sock, msg) {
         if (!msg.payload || !msg.payload.sessionId || !msg.payload.id) {
+            error('getItem:INVALID_MESSAGE_FORMAT:', JSON.stringify(msg.payload, false, 2));
             return sock.send(msg.cb, { success: false, code: 'INVALID_MESSAGE_FORMAT' });
         }
 
@@ -66,9 +68,10 @@ class Items {
             (item) => {
                 sock.send(msg.cb, { success: true, payload: item });
             }, () => {
+                error('getItem:NOT_FOUND:', JSON.stringify(msg.payload, false, 2));
                 sock.send(msg.cb, { success: false, code: 'NOT_FOUND', message: 'Item not found' });
             }
-        );        
+        );
     }
 
     get modName() {
