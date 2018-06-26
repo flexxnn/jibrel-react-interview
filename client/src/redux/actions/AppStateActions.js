@@ -5,9 +5,6 @@ export const APPLICATION_TOGGLE_STATE = 'APPLICATION_TOGGLE_STATE';
 export const APPLICATION_STARTED = 'APPLICATION_STARTED';
 export const APPLICATION_FATAL_ERROR = 'FATAL_ERROR';
 
-export const APPLICATION_MODAL_ITEM_INFO = 'APPLICATION_MODAL_ITEM_INFO';
-export const APPLICATION_MODAL_CLOSE_ALL = 'APPLICATION_MODAL_CLOSE_ALL';
-
 export function appToggleState() {
     return {
         type: APPLICATION_TOGGLE_STATE
@@ -38,20 +35,5 @@ export function appSetFatalError(errorText) {
         payload: {
             fatalError: errorText
         }
-    }
-}
-
-export function appOpenModalItemInfo(itemId) {
-    return {
-        type: APPLICATION_MODAL_ITEM_INFO,
-        payload: {
-            id: itemId
-        }
-    }
-}
-
-export function appCloseModalAll() {
-    return {
-        type: APPLICATION_MODAL_CLOSE_ALL
     }
 }
