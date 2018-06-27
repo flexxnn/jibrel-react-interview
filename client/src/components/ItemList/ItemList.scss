@@ -81,6 +81,12 @@
                 float: left;
                 margin-right: 10px;
             }
+            @media only screen 
+            and (max-device-width: 420px) {
+                .line-1 {
+                    margin-bottom: 3px;
+                }
+            }
         }
 
         & > .request-id {

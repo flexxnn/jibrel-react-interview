@@ -53,4 +53,9 @@
             background-color:darken(#E3F2FD, 20%);
         }
     }
+
+    @media only screen 
+        and (max-device-width: 420px) {
+            min-width: 320px;
+        }    
 }
