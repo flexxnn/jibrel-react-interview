@@ -1,8 +1,11 @@
 # jibrel
 
-Todo:
-- Fix swagger when no server found
-- Two algos of items processing
+### HowTo
+1. Install server and client modules `npm i`
+2. Use `npm start` on server and client
+3. To enable server logs - use `export DEBUG="*:log,*:err"`
+4. To enable logs in browser - execute `window.localStorage.debug = '*:log,*:error,*:warn'` in console
+
 
 Задача
 
