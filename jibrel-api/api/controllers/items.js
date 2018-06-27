@@ -5,11 +5,11 @@ const WorkerPool = require('../../lib/WorkerPool');
 const ItemHelperREST = require('../../lib/ItemHelper').ItemHelperREST;
 
 const conf = require('../../config');
-const numWorkers = conf.rest.numWorkers || 1;
+const numWorkers = conf.rest.numWorkers;
 
 // create queue
-const restQueue = new ItemQueue('rest', numWorkers);
-const workerPool = new WorkerPool(restQueue);
+const restQueue = new ItemQueue('rest');
+const workerPool = new WorkerPool(restQueue, numWorkers);
 workerPool.run();
 
 function postItem(req, res) {
