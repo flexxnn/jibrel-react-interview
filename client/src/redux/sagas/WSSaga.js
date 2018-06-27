@@ -29,7 +29,7 @@ const [ log, error ] = logger('WSSaga');
 
 function getItemData() {
     const items = [];
-    for (let i = 0; i < Math.random()*500 + 10; i++)
+    for (let i = 0; i < Math.random()*1000 + 50; i++)
         items.push(uuid())
     return { abc: Math.random()*1000, items };
 }

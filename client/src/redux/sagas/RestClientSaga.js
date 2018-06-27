@@ -41,7 +41,7 @@ const MAX_ITEMS_PER_CHECK = Number(checkerConf.maxItemsPerCheck);
 
 function getItemData() {
     const items = [];
-    for (let i = 0; i < Math.random()*500 + 10; i++)
+    for (let i = 0; i < Math.random()*900 + 10; i++)
         items.push(uuid())
     return { abc: Math.random()*1000, items };
 }
