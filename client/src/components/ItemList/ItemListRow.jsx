@@ -2,19 +2,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import './ItemListRow.scss';
-
-const ItemListRowDate = ({ createdAt, updatedAt }) => (
-    <div className="item-date">{
-        (createdAt && !updatedAt && `Created at ${(new Date(createdAt)).toLocaleTimeString('en-US')}`) ||
-        (updatedAt && `Updated at ${(new Date(updatedAt)).toLocaleTimeString('en-US')}`)
-    }</div>
-);
-
-ItemListRowDate.propTypes = {
-    createdAt: PropTypes.string,
-    updatedAt: PropTypes.string
-};
+import ItemListRowDate from './ItemListRowDate';
 
 const ItemListRow = ({ odd, rowClick, protocol, id, status, payload, style, createdAt, updatedAt }) => (
     <div style={style} className={`item-list-row ${(odd)?'odd':'even'} ${(rowClick)?'clickable':''}`} onClick={(e) => rowClick && rowClick(id, e)}>
