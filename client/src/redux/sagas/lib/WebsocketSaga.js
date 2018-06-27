@@ -148,8 +148,8 @@ export function* socketSend({ message, payload = {},
     }
 
     yield put(sendChannel, { type: WS_SOCKET_SEND, payload: msg });
-    
-    return msg['cb'];
+
+    return msg;
 }
 
 export function* socketTask({url, reconnectTimeout = 1000, connEstablishedTaskFn = null}) {
