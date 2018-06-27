@@ -74,27 +74,3 @@ h1 {
         flex-wrap: wrap; 
     }
 }
-
-.request-list {
-    display: flex;
-    flex: 1 0 auto;
-    flex-direction: column;
-    flex-wrap: wrap;
-
-    .row {
-        padding: 10px 20px;
-        border-bottom: 1px solid $line;
-        & > .request-id {
-            margin-bottom: 5px;            
-        }
-        & > .request-status {
-            position: absolute;
-            right: 20px;
-            top: 18px;
-        }
-        &.odd {
-            background-color:#FFFDE7;
-        }
-    }
-}
-
