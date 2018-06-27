@@ -1,4 +1,7 @@
 
+@import '../../styles/colors.scss';
+@import '../../styles/params.scss';
+
 .modal-wrapper {
     min-width: 480px;
     h2 {
@@ -12,8 +15,8 @@
                 display: block;
                 width: 100%;
                 min-height: 200px;
-                border: 1px solid #E3F2FD;
-                background-color: #E3F2FD;
+                border: 1px solid $main-color;
+                background-color: $main-color;
                 margin-top: 10px;
             }
             &.result textarea, &.errors textarea {
@@ -29,28 +32,14 @@
             line-height: 10px;
             border: 0;
             cursor: pointer;
-            background-color:darken(#E3F2FD, 10%);
+            background-color:darken($main-color, 10%);
             color: #333;
-/*                       
-            height: 60px;
-            padding: 0;
-            font-size: 22px;
-            color: white;
-            text-align: center;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-            background: #f1c40f;
-            border: 0;
-            border-bottom: 2px solid #e2b607;
-            cursor: pointer;
-            -webkit-box-shadow: inset 0 -2px #e2b607;
-            box-shadow: inset 0 -2px #e2b607;
-*/
         }
         button:hover {
-            background-color:darken(#E3F2FD, 15%);
+            background-color:darken($main-color, 15%);
         }
         button:active {
-            background-color:darken(#E3F2FD, 20%);
+            background-color:darken($main-color, 20%);
         }
     }
 

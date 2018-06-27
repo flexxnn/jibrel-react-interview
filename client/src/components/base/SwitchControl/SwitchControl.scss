@@ -1,3 +1,6 @@
+@import '../../../styles/colors.scss';
+@import '../../../styles/params.scss';
+
 .switch-control {
     .switch {
         border: 1px solid #ccc;
@@ -21,7 +24,7 @@
     }
 
     .switch.on {
-        background: #E3F2FD;
+        background: $main-color;
     }
 
     .switch.on .switch-toggle {

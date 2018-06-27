@@ -99,10 +99,10 @@
             top: 18px;
         }
         &.odd {
-            background-color:#E3F2FD;
+            background-color:$main-color;
         }
         &.clickable:hover {
-            background-color: darken(#E3F2FD, 5%);
+            background-color: darken($main-color, 5%);
             cursor: pointer;
         }
     }
