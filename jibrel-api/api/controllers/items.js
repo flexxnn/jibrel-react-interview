@@ -2,9 +2,13 @@
 
 const ItemQueue = require('../../lib/ItemQueue');
 const WorkerPool = require('../../lib/WorkerPool');
+const ItemHelperREST = require('../../lib/ItemHelper').ItemHelperREST;
+
+const conf = require('../../config');
+const numWorkers = conf.rest.numWorkers || 1;
 
 // create queue
-const restQueue = new ItemQueue();
+const restQueue = new ItemQueue('rest', numWorkers);
 const workerPool = new WorkerPool(restQueue);
 workerPool.run();
 
@@ -14,7 +18,7 @@ function postItem(req, res) {
     restQueue.createItem(requestPayload).then(
         (createdItem) => {
             //res.status(400).json({ message: "Item creation failture", code: "SERVER_ERROR" });
-            res.json(createdItem);
+            res.json(ItemHelperREST(createdItem));
         },
         ()=> {
             res.status(400).json({ message: "Item creation failture", code: "SERVER_ERROR" });
@@ -27,7 +31,7 @@ function getItem(req, res) {
 
     restQueue.getItem(id).then(
         (item) => {
-            res.json(item);
+            res.json(ItemHelperREST(item));
         },
         (error)=> {
             res.status(400).json({ message: error, code: "SERVER_ERROR" });

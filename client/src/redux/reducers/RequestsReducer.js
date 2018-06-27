@@ -17,7 +17,6 @@ const {
 // for (let i = 0; i < 100000; i++)
 //     items100k.push({id: 'id'+i, status: 'error'});
 
-// eslint-disable-next-line import/prefer-default-export
 export function requests(state = [], action) 
 {
     switch (action.type) 

@@ -30,7 +30,7 @@ const rowRenderer = (items, rowClick) => ({
             style={style}
             odd={(index%2 === 0)}
             id={items[index].id}
-            payload={JSON.stringify(items[index].requestPayload).substr(0, 150)}
+            payload={items[index].requestPayload && JSON.stringify(items[index].requestPayload).substr(0, 150)}
             protocol={items[index].type}
             status={items[index].status}
             createdAt={items[index].createdAt}

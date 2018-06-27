@@ -5,6 +5,8 @@ import { delay, channel, buffers } from 'redux-saga';
 import { logger } from '../../utils';
 import { selectItemsArray } from '../StateSelectors';
 
+import uuid from 'uuid/v4';
+
 import actions from '../actions';
 import config from '../../config.yaml';
 
@@ -38,11 +40,10 @@ const CHECKER_THROTTLE = Number(checkerConf.itemUpdateThrottle);
 const MAX_ITEMS_PER_CHECK = Number(checkerConf.maxItemsPerCheck);
 
 function getItemData() {
-    let s = '';
-    for (let i = 0; i < 20000; i++)
-        s = s + i;
-    // console.log(s.length);
-    return { abc: Math.random()*1000, s };
+    const items = [];
+    for (let i = 0; i < Math.random()*500 + 10; i++)
+        items.push(uuid())
+    return { abc: Math.random()*1000, items };
 }
 
 function* makeRequestsTask() {

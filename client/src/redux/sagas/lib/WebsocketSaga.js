@@ -32,7 +32,7 @@ function watchMessages(socket) {
             emit({ open: true });
         };
         socket.onmessage = (msg) => {
-            log('on message '+msg.data);
+            // log('on message '+msg.data);
             try {                
                 const data = JSON.parse(msg.data);
                 emit({ data });
@@ -58,7 +58,7 @@ function* sendListener({ socket, sendChannel }) {
     try {
         while (true) {
             const { payload } = yield take(sendChannel);
-            log('sendListener:', payload);
+            // log('sendListener:', payload);
             if (socket.readyState === 1) // The connection is open and ready to communicate
                 socket.send(JSON.stringify(payload));
         }
@@ -74,7 +74,7 @@ function* recvListener({ recvChannel, sessionBuffer, connEstablishedTaskFn }) {
     try {    
         while (true) {
             const msg = yield take(recvChannel);
-            log('recvListener', msg);
+            log('recvListener', JSON.stringify(msg, false, 2));
 
             // catch connection error and exit from recvListener
             // it will cancel sendListener too (see race doc)

@@ -28,10 +28,10 @@ const {
 const [ log, error ] = logger('WSSaga');
 
 function getItemData() {
-    let s = '';
-    for (let i = 0; i < 100; i++)
-        s = s + i;
-    return { abc: Math.random()*1000, s };
+    const items = [];
+    for (let i = 0; i < Math.random()*500 + 10; i++)
+        items.push(uuid())
+    return { abc: Math.random()*1000, items };
 }
 
 // const pingAction = ({message, req, res}) => {
@@ -93,6 +93,13 @@ function* itemCheckTask() {
 function* itemPostTask() {
     try {
         const sessionId = yield getContext('sessionId');
+        yield socketSend({
+            message: 'items.updateSessionId',
+            payload: {
+                sessionId
+            }
+        });
+
         while(true) {
             yield socketSend({
                 message: 'items.addItem',

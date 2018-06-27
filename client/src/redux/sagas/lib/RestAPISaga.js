@@ -120,9 +120,9 @@ export function* restAPICallCancellable({methodName, requestPayload = {},
                 const payload = {
                     methodName,
                     success: false,
-                    status: e.status,
+                    status: (e.response) ? e.response.status : 0,
                     req: requestPayload,
-                    res: (e.result) ? e.result.data : {},
+                    res: (e.response) ? e.response.data : {},
                     ...actionPayload
                 };
                 const res = errorAction(payload);

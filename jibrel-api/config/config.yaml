@@ -1,0 +1,8 @@
+ws:
+  numWorkers: 10
+
+rest:
+  numWorkers: 10
+
+server:
+  port: 10010

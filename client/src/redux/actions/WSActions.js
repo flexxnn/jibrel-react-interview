@@ -54,16 +54,20 @@ export function wsItemCheckAction({req, res}) {
             type: WS_ITEM_CHECK,
             payload: { 
                 ...res.payload,
-                updateTimestamp: +(new Date())
-            }
-        };
-    else
-        return {
-            type: WS_ITEM_CHECK_ERROR,
-            payload: {
-                status: 'error',
                 id: req.payload.id,
                 updateTimestamp: +(new Date())
             }
         };
+    else
+    {
+        return {
+            type: WS_ITEM_CHECK_ERROR,
+            payload: {
+                status: 'error',
+                error: res,
+                id: req.payload.id,
+                updateTimestamp: +(new Date())
+            }
+        };
+    }
 }

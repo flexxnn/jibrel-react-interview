@@ -26,7 +26,7 @@ class ItemQueue extends EventEmitter {
             delete this._items[itemId];
 
             log(`Queue (${name}) bug, dropped item ${itemId}`);
-        }, 100);
+        }, 500);
     }
 
     createItem(payload, sessionId = null) {

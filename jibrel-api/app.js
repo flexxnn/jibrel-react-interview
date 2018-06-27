@@ -4,8 +4,9 @@ const SwaggerExpress = require('swagger-express-mw');
 const express = require('express');
 // const bodyParser = require('body-parser')
 const http = require('http');
-
 const messaging = require('./ws');
+
+const conf = require('./config');
 
 var config = {
   appRoot: __dirname // required config
@@ -22,9 +23,9 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
   swaggerExpress.register(app);  
 
   // start listen
-  var port = process.env.PORT || 10010;
+  var port = process.env.PORT || conf.server.port;
   httpServer.listen(port, '0.0.0.0');
-   
+  
   new (messaging)(httpServer);
 });
 

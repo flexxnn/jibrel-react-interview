@@ -38,7 +38,7 @@ class Worker {
                 item = await this._itemQueue.popItem();
             } catch (e) {
                 // queue is empty, or can't get next item
-                await timeout(5);
+                await timeout(100);
                 continue;
             }
 
@@ -55,7 +55,7 @@ class Worker {
                 } catch (e) {}
 
                 error('Worker error', e);
-                await timeout(5);
+                await timeout(100);
             }
         }
         
