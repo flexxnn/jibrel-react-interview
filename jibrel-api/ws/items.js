@@ -7,6 +7,7 @@ const error = require('debug')('ws-items:error');
 const ItemQueue = require('../lib/ItemQueue');
 const WorkerPool = require('../lib/WorkerPool');
 const ItemHelperWS = require('../lib/ItemHelper').ItemHelperWS;
+const processItemWS = require('../lib/WorkerFunctions').processItemWS;
 
 const conf = require('../config');
 const numWorkers = conf.ws.numWorkers || 1;
@@ -16,7 +17,7 @@ class Items {
         // create queue
         this._wsQueue = new ItemQueue('ws');
         // create worker pool
-        this._workerPool = new WorkerPool(this._wsQueue, numWorkers);
+        this._workerPool = new WorkerPool(this._wsQueue, processItemWS, numWorkers);
         this._workerPool.run();
 
         this._clientSessions = {};

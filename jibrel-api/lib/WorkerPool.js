@@ -5,7 +5,7 @@ const log           = require('debug')('WorkerPool:log');
 const Worker = require('./Worker');
 
 class WorkerPool {
-    constructor(itemQueue, numWorkers = 50) {
+    constructor(itemQueue, processFn, numWorkers = 50) {
         this._itemQueue = itemQueue;
         this._numWorkers = numWorkers;
 
@@ -13,7 +13,7 @@ class WorkerPool {
         this._started = false;
 
         for (let i = 0; i < numWorkers; i++)
-            this._workers.push(new Worker(itemQueue));
+            this._workers.push(new Worker(itemQueue, processFn));
         
         this.run = this.run.bind(this);
         this.stop = this.stop.bind(this);

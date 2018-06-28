@@ -6,23 +6,14 @@ function timeout(ms) {
 }
 
 class Worker {
-    constructor(itemQueue) {
+    constructor(itemQueue, processFn) {
         this._itemQueue = itemQueue;
         this._stop = false;
         this._stopPromise = null;
+        this._processItem = processFn;
 
         this.run = this.run.bind(this);
         this.stop = this.stop.bind(this);
-    }
-
-    async _processItem(item) {
-        log("_processItem (Queue: "+this._itemQueue.name+")", item.id);
-        const ms = Math.floor(Math.random()*10000) + 1;
-        await timeout(ms);
-        return {
-            ...item,
-            result: { processingTime: ms }
-        }
     }
 
     async run() {
@@ -46,6 +37,7 @@ class Worker {
                 // set working status
                 await this._itemQueue.updateItem(item.id, {}, 'working');
                 // process
+                log("_processItem (Queue: "+this._itemQueue.name+")", item.id);
                 const result = await this._processItem(item);
                 // put it back
                 await this._itemQueue.updateItem(item.id, result);
