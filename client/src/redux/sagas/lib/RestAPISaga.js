@@ -100,6 +100,7 @@ export function* restAPICallCancellable({methodName, requestPayload = {},
         if (successAction) {
             yield put(successAction(payload));
         }
+        return payload;
     } catch (e) {
         if (errorAction) {
             if (e.message === 'Network Error') {

@@ -3,7 +3,7 @@ import { all, put, call, select,
         fork, take, cancel } from 'redux-saga/effects'        
 import { delay, channel, buffers } from 'redux-saga';
 import { logger } from '../../utils';
-import { selectItemsArray } from '../StateSelectors';
+import { selectItemsArray, selectItem } from '../StateSelectors';
 
 import uuid from 'uuid/v4';
 
@@ -88,15 +88,22 @@ function* itemUpdateThread(chan) {
             // log('check '+chnum+' '+id);
             const id = yield take(chan);
 
-            yield call(restAPICallCancellable, {
+            const result = yield call(restAPICallCancellable, {
                 methodName: 'getItem',
                 requestPayload: { id },
-                successAction: restItemUpdate,
+                // successAction: restItemUpdate,
                 errorAction: (e) => {
                     if (e && e.res && e.res.code !== 'NETWORK_ERROR')
                         return restItemUpdateError(e);
                 }
             });
+
+            if (result) {
+                const item = yield select(state => selectItem(state, result.req.id));
+                if (result.res.status !== item.status) {
+                    yield put(restItemUpdate(result));
+                }
+            }
 
             if (CHECKER_TIMEOUT > 0)
                 yield delay(CHECKER_TIMEOUT);
